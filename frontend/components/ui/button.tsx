@@ -1,26 +1,25 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "bg-ve-blue text-white hover:bg-ve-blue/90",
-        destructive: "bg-ve-red text-white hover:bg-ve-red/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-ve-blue underline-offset-4 hover:underline dark:text-ve-yellow",
-        yellow: "bg-ve-yellow text-gray-900 hover:bg-ve-yellow/90 font-bold",
+        default: "bg-black text-white hover:bg-black/90",
+        destructive: "bg-[#FF4A60] text-white hover:bg-[#FF4A60]/90",
+        outline: "border-2 border-black bg-white hover:bg-gray-50 text-black",
+        secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
+        ghost: "hover:bg-gray-100",
+        link: "text-black underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-xl px-8",
-        icon: "h-10 w-10",
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3",
+        lg: "h-10 rounded-md px-6",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {

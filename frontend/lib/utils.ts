@@ -1,3 +1,10 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 export function formatUSDC(microUsdc: number): string {
   const usdc = microUsdc / 1_000_000;
   return `$${usdc.toFixed(2)} USDC`;

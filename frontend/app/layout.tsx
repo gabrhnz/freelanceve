@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
+import { Onest } from "next/font/google";
 import "./globals.css";
 import WalletProvider from "@/components/WalletProvider";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { LanguageProvider } from "@/contexts/language-context";
 import { Toaster } from "react-hot-toast";
+
+const onest = Onest({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-onest",
+});
 
 export const metadata: Metadata = {
   title: "SolanceWork — Freelance Marketplace | Pay with USDC on Solana",
@@ -17,20 +23,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen antialiased">
-        <WalletProvider>
-          <Navbar />
-          <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
-          <Footer />
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              className:
-                "!bg-gray-900 !text-white dark:!bg-gray-800",
-            }}
-          />
-        </WalletProvider>
+    <html lang="en">
+      <body className={`${onest.variable} font-sans antialiased overflow-x-hidden`}>
+        <LanguageProvider>
+          <WalletProvider>
+            {children}
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                className: "!bg-black !text-white !border-2 !border-white",
+              }}
+            />
+          </WalletProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

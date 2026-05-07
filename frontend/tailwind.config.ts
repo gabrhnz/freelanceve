@@ -8,6 +8,9 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-onest)", "system-ui", "sans-serif"],
+      },
       colors: {
         ve: {
           red: "#CF142B",
