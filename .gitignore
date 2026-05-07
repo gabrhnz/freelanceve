@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Anchor/Rust
+target/
+.anchor/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# Vercel
+.vercel
+
+# Misc
+*.log

@@ -1,0 +1,186 @@
+{
+  "version": "0.1.0",
+  "name": "freelance_ve",
+  "instructions": [
+    {
+      "name": "registerFreelancer",
+      "accounts": [
+        { "name": "profile", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "nombre", "type": "string" },
+        { "name": "bio", "type": "string" },
+        { "name": "categoria", "type": "string" },
+        { "name": "skills", "type": { "vec": "string" } }
+      ]
+    },
+    {
+      "name": "updateProfile",
+      "accounts": [
+        { "name": "profile", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": false, "isSigner": true }
+      ],
+      "args": [
+        { "name": "nombre", "type": "string" },
+        { "name": "bio", "type": "string" },
+        { "name": "skills", "type": { "vec": "string" } }
+      ]
+    },
+    {
+      "name": "createService",
+      "accounts": [
+        { "name": "service", "isMut": true, "isSigner": false },
+        { "name": "profile", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "titulo", "type": "string" },
+        { "name": "descripcion", "type": "string" },
+        { "name": "precioUsdc", "type": "u64" },
+        { "name": "deliveryDays", "type": "u8" },
+        { "name": "categoria", "type": "string" }
+      ]
+    },
+    {
+      "name": "toggleService",
+      "accounts": [
+        { "name": "service", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": false, "isSigner": true }
+      ],
+      "args": [
+        { "name": "activo", "type": "bool" }
+      ]
+    },
+    {
+      "name": "placeOrder",
+      "accounts": [
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "service", "isMut": true, "isSigner": false },
+        { "name": "client", "isMut": true, "isSigner": true },
+        { "name": "clientUsdc", "isMut": true, "isSigner": false },
+        { "name": "escrowUsdc", "isMut": true, "isSigner": false },
+        { "name": "escrowAuthority", "isMut": false, "isSigner": false },
+        { "name": "usdcMint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "deliverOrder",
+      "accounts": [
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "freelancer", "isMut": false, "isSigner": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "approveOrder",
+      "accounts": [
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "escrowUsdc", "isMut": true, "isSigner": false },
+        { "name": "escrowAuthority", "isMut": false, "isSigner": false },
+        { "name": "freelancerUsdc", "isMut": true, "isSigner": false },
+        { "name": "freelancerProfile", "isMut": true, "isSigner": false },
+        { "name": "client", "isMut": false, "isSigner": true },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    },
+    {
+      "name": "refundOrder",
+      "accounts": [
+        { "name": "order", "isMut": true, "isSigner": false },
+        { "name": "escrowUsdc", "isMut": true, "isSigner": false },
+        { "name": "escrowAuthority", "isMut": false, "isSigner": false },
+        { "name": "clientUsdc", "isMut": true, "isSigner": false },
+        { "name": "signer", "isMut": false, "isSigner": true },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "FreelancerProfile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "owner", "type": "publicKey" },
+          { "name": "nombre", "type": "string" },
+          { "name": "bio", "type": "string" },
+          { "name": "categoria", "type": "string" },
+          { "name": "skills", "type": { "vec": "string" } },
+          { "name": "jobsCompleted", "type": "u32" },
+          { "name": "totalEarned", "type": "u64" },
+          { "name": "rating", "type": "u8" },
+          { "name": "serviceCount", "type": "u32" },
+          { "name": "createdAt", "type": "i64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "ServiceListing",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "freelancer", "type": "publicKey" },
+          { "name": "titulo", "type": "string" },
+          { "name": "descripcion", "type": "string" },
+          { "name": "precioUsdc", "type": "u64" },
+          { "name": "deliveryDays", "type": "u8" },
+          { "name": "categoria", "type": "string" },
+          { "name": "activo", "type": "bool" },
+          { "name": "ordersCount", "type": "u32" },
+          { "name": "createdAt", "type": "i64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "Order",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "client", "type": "publicKey" },
+          { "name": "freelancer", "type": "publicKey" },
+          { "name": "service", "type": "publicKey" },
+          { "name": "amount", "type": "u64" },
+          { "name": "status", "type": { "defined": "OrderStatus" } },
+          { "name": "deadline", "type": "i64" },
+          { "name": "createdAt", "type": "i64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "OrderStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "InProgress" },
+          { "name": "Delivered" },
+          { "name": "Completed" },
+          { "name": "Refunded" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "InvalidStatus", "msg": "Invalid order status for this operation" },
+    { "code": 6001, "name": "Unauthorized", "msg": "You are not authorized to perform this action" },
+    { "code": 6002, "name": "DeadlineNotReached", "msg": "The deadline has not been reached yet" },
+    { "code": 6003, "name": "DeadlinePassed", "msg": "The deadline has already passed" },
+    { "code": 6004, "name": "PriceTooLow", "msg": "Price must be at least 1 USDC (1_000_000 micro-USDC)" },
+    { "code": 6005, "name": "InvalidDeliveryDays", "msg": "Delivery days must be between 1 and 30" },
+    { "code": 6006, "name": "NameTooLong", "msg": "Name must be 50 characters or less" },
+    { "code": 6007, "name": "BioTooLong", "msg": "Bio must be 200 characters or less" }
+  ]
+}
