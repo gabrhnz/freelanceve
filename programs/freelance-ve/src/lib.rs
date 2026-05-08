@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-declare_id!("FReeVe1111111111111111111111111111111111111");
+declare_id!("6zjwrFhvtcub6FYvb3kZCGTXLT3pzH2fQmyjFhM5WQSb");
 
 #[program]
 pub mod freelance_ve {
@@ -151,6 +151,10 @@ pub mod freelance_ve {
     }
 
     pub fn approve_order(ctx: Context<ApproveOrder>) -> Result<()> {
+        let order_bump = ctx.accounts.order.bump;
+        let order_amount = ctx.accounts.order.amount;
+        let order_key = ctx.accounts.order.key();
+
         let order = &mut ctx.accounts.order;
         require!(
             order.client == ctx.accounts.client.key(),
@@ -162,11 +166,10 @@ pub mod freelance_ve {
         );
 
         // Release USDC from escrow to freelancer
-        let order_key = ctx.accounts.order.key();
         let seeds = &[
             b"escrow".as_ref(),
             order_key.as_ref(),
-            &[ctx.accounts.order.bump],
+            &[order_bump],
         ];
         let signer_seeds = &[&seeds[..]];
 
@@ -177,18 +180,22 @@ pub mod freelance_ve {
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-        token::transfer(cpi_ctx, order.amount)?;
+        token::transfer(cpi_ctx, order_amount)?;
 
         order.status = OrderStatus::Completed;
 
         let profile = &mut ctx.accounts.freelancer_profile;
         profile.jobs_completed = profile.jobs_completed.checked_add(1).unwrap();
-        profile.total_earned = profile.total_earned.checked_add(order.amount).unwrap();
+        profile.total_earned = profile.total_earned.checked_add(order_amount).unwrap();
 
         Ok(())
     }
 
     pub fn refund_order(ctx: Context<RefundOrder>) -> Result<()> {
+        let order_bump = ctx.accounts.order.bump;
+        let order_amount = ctx.accounts.order.amount;
+        let order_key = ctx.accounts.order.key();
+
         let order = &mut ctx.accounts.order;
         let now = Clock::get()?.unix_timestamp;
 
@@ -199,11 +206,10 @@ pub mod freelance_ve {
         );
 
         // Refund USDC from escrow to client
-        let order_key = ctx.accounts.order.key();
         let seeds = &[
             b"escrow".as_ref(),
             order_key.as_ref(),
-            &[ctx.accounts.order.bump],
+            &[order_bump],
         ];
         let signer_seeds = &[&seeds[..]];
 
@@ -214,7 +220,7 @@ pub mod freelance_ve {
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-        token::transfer(cpi_ctx, order.amount)?;
+        token::transfer(cpi_ctx, order_amount)?;
 
         order.status = OrderStatus::Refunded;
 
@@ -287,9 +293,9 @@ pub struct PlaceOrder<'info> {
         seeds = [b"order", service.key().as_ref(), &service.orders_count.to_le_bytes()],
         bump
     )]
-    pub order: Account<'info, Order>,
+    pub order: Box<Account<'info, Order>>,
     #[account(mut)]
-    pub service: Account<'info, ServiceListing>,
+    pub service: Box<Account<'info, ServiceListing>>,
     #[account(mut)]
     pub client: Signer<'info>,
     #[account(
@@ -297,7 +303,7 @@ pub struct PlaceOrder<'info> {
         constraint = client_usdc.owner == client.key(),
         constraint = client_usdc.mint == usdc_mint.key()
     )]
-    pub client_usdc: Account<'info, TokenAccount>,
+    pub client_usdc: Box<Account<'info, TokenAccount>>,
     #[account(
         init,
         payer = client,
@@ -306,14 +312,14 @@ pub struct PlaceOrder<'info> {
         seeds = [b"escrow_token", order.key().as_ref()],
         bump
     )]
-    pub escrow_usdc: Account<'info, TokenAccount>,
+    pub escrow_usdc: Box<Account<'info, TokenAccount>>,
     /// CHECK: PDA authority for escrow, seeds verified
     #[account(
         seeds = [b"escrow", order.key().as_ref()],
         bump
     )]
     pub escrow_authority: UncheckedAccount<'info>,
-    pub usdc_mint: Account<'info, Mint>,
+    pub usdc_mint: Box<Account<'info, Mint>>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
