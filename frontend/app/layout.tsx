@@ -3,6 +3,7 @@ import { Onest } from "next/font/google";
 import "./globals.css";
 import WalletProvider from "@/components/WalletProvider";
 import { LanguageProvider } from "@/contexts/language-context";
+import { SessionProvider } from "@/contexts/session-context";
 import { Toaster } from "react-hot-toast";
 
 const onest = Onest({
@@ -26,15 +27,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${onest.variable} font-sans antialiased overflow-x-hidden`}>
         <LanguageProvider>
-          <WalletProvider>
-            {children}
-            <Toaster
-              position="bottom-right"
-              toastOptions={{
-                className: "!bg-black !text-white !border-2 !border-white",
-              }}
-            />
-          </WalletProvider>
+          <SessionProvider>
+            <WalletProvider>
+              {children}
+              <Toaster
+                position="bottom-right"
+                toastOptions={{
+                  className: "!bg-black !text-white !border-2 !border-white",
+                }}
+              />
+            </WalletProvider>
+          </SessionProvider>
         </LanguageProvider>
       </body>
     </html>
