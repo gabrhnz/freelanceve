@@ -23,31 +23,31 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ service, publicKey }: ServiceCardProps) {
   const content = (
-    <div className="group rounded-xl border border-gray-200 bg-white p-5 transition hover:border-ve-blue/30 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-ve-yellow/30">
+    <div className="group bg-white border-4 border-black rounded-xl p-5 transition-all hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
       <div className="mb-3 flex items-center justify-between">
-        <span className="rounded-full bg-ve-blue/10 px-2.5 py-0.5 text-xs font-medium text-ve-blue dark:text-ve-yellow">
+        <span className="bg-ve-blue text-white border-2 border-black rounded-lg px-2.5 py-0.5 text-xs font-bold">
           {service.categoria}
         </span>
-        {service.activo ? (
-          <span className="h-2 w-2 rounded-full bg-green-500" />
-        ) : (
-          <span className="h-2 w-2 rounded-full bg-gray-400" />
-        )}
+        <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border-2 border-black ${
+          service.activo ? "bg-ve-yellow" : "bg-gray-200 text-gray-500"
+        }`}>
+          {service.activo ? "Activo" : "Pausado"}
+        </span>
       </div>
 
-      <h3 className="mb-1 text-lg font-bold text-gray-900 group-hover:text-ve-blue dark:text-white dark:group-hover:text-ve-yellow">
+      <h3 className="mb-1 text-lg font-bold">
         {service.titulo}
       </h3>
 
       {service.descripcion && (
-        <p className="mb-3 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mb-3 line-clamp-2 text-sm text-[#393939] font-medium">
           {service.descripcion}
         </p>
       )}
 
-      <div className="flex items-center justify-between border-t border-gray-100 pt-3 dark:border-gray-800">
+      <div className="flex items-center justify-between border-t-3 border-black/10 pt-3">
         <USDCBadge amount={service.precioUsdc.toNumber()} compact />
-        <span className="text-xs text-gray-500 dark:text-gray-400">
+        <span className="text-xs font-bold text-[#393939]">
           {service.deliveryDays} días
         </span>
       </div>

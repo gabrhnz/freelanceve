@@ -20,20 +20,20 @@ interface ProfileCardProps {
 
 export default function ProfileCard({ profile }: ProfileCardProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+    <div className="bg-white border-4 border-black rounded-xl p-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
       <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-ve-blue to-ve-red text-lg font-bold text-white">
+        <div className="w-12 h-12 bg-[#9945FF] rounded-xl border-3 border-black flex items-center justify-center text-lg font-bold text-white">
           {profile.nombre.charAt(0).toUpperCase()}
         </div>
         <div>
-          <p className="font-bold dark:text-white">{profile.nombre}</p>
-          <p className="text-xs text-gray-500">
+          <p className="font-bold">{profile.nombre}</p>
+          <p className="text-xs font-mono text-[#393939]">
             {shortWallet(profile.owner.toBase58())}
           </p>
         </div>
       </div>
 
-      <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+      <p className="mb-3 text-sm text-[#393939] font-medium">
         {profile.bio}
       </p>
 
@@ -41,31 +41,25 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         {profile.skills.map((s) => (
           <span
             key={s}
-            className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+            className="bg-ve-yellow border-2 border-black rounded-lg px-2 py-0.5 text-[10px] font-bold shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
           >
             {s}
           </span>
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+      <div className="mt-4 grid grid-cols-3 gap-2 border-t-3 border-black/10 pt-3">
         <div className="text-center">
-          <p className="text-sm font-bold text-ve-blue dark:text-ve-yellow">
-            {profile.jobsCompleted}
-          </p>
-          <p className="text-[10px] text-gray-500">Trabajos</p>
+          <p className="text-sm font-bold">{profile.jobsCompleted}</p>
+          <p className="text-[10px] font-bold text-[#393939]">Trabajos</p>
         </div>
         <div className="text-center">
-          <p className="text-sm font-bold text-ve-blue dark:text-ve-yellow">
-            {formatUSDC(profile.totalEarned.toNumber())}
-          </p>
-          <p className="text-[10px] text-gray-500">Ganado</p>
+          <p className="text-sm font-bold">{formatUSDC(profile.totalEarned.toNumber())}</p>
+          <p className="text-[10px] font-bold text-[#393939]">Ganado</p>
         </div>
         <div className="text-center">
-          <p className="text-sm font-bold dark:text-white">
-            {profile.rating || "—"}
-          </p>
-          <p className="text-[10px] text-gray-500">Rating</p>
+          <p className="text-sm font-bold">{profile.rating || "—"}</p>
+          <p className="text-[10px] font-bold text-[#393939]">Rating</p>
         </div>
       </div>
     </div>

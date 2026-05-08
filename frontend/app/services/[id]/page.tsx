@@ -15,8 +15,9 @@ import {
 } from "@/lib/anchor";
 import { USDC_MINT_DEVNET } from "@/lib/constants";
 import { formatUSDC, shortWallet } from "@/lib/utils";
-import USDCBadge from "@/components/USDCBadge";
+import { Navigation } from "@/components/navigation";
 import ProfileCard from "@/components/ProfileCard";
+import { Clock, ShoppingCart, Package, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   getAssociatedTokenAddress,
@@ -118,7 +119,7 @@ export default function ServiceDetailPage() {
         })
         .rpc();
 
-      toast.success("¡Orden creada! USDC depositado en escrow.");
+      toast.success("Orden creada! USDC depositado en escrow.");
       fetchService();
     } catch (err: unknown) {
       console.error(err);
@@ -132,17 +133,26 @@ export default function ServiceDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-ve-blue border-t-transparent" />
-      </div>
+      <>
+        <Navigation />
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-black border-t-transparent" />
+        </div>
+      </>
     );
   }
 
   if (!service) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-lg text-gray-500">Servicio no encontrado.</p>
-      </div>
+      <>
+        <Navigation />
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="bg-white border-4 border-black rounded-xl p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center max-w-md mx-4">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-xl font-bold mb-2">Servicio no encontrado</p>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -150,102 +160,108 @@ export default function ServiceDetailPage() {
     publicKey && service.freelancer.toBase58() === publicKey.toBase58();
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Service info */}
-        <div className="space-y-6 lg:col-span-2">
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  service.activo
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-                }`}
-              >
-                {service.activo ? "Activo" : "Pausado"}
-              </span>
-              <span className="rounded-full bg-ve-blue/10 px-3 py-1 text-xs font-medium text-ve-blue dark:text-ve-yellow">
-                {service.categoria}
-              </span>
-            </div>
-            <h1 className="text-3xl font-extrabold dark:text-white">
-              {service.titulo}
-            </h1>
-          </div>
-
-          <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
-              Descripción
-            </h3>
-            <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
-              {service.descripcion}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-800 dark:bg-gray-900">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Precio</p>
-              <USDCBadge amount={service.precioUsdc.toNumber()} />
-            </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-800 dark:bg-gray-900">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Entrega
-              </p>
-              <p className="mt-1 text-lg font-bold dark:text-white">
-                {service.deliveryDays} días
-              </p>
-            </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4 text-center dark:border-gray-800 dark:bg-gray-900">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Órdenes
-              </p>
-              <p className="mt-1 text-lg font-bold dark:text-white">
-                {service.ordersCount}
-              </p>
-            </div>
-          </div>
-
-          {/* Order button */}
-          {!isOwner && service.activo && (
-            <button
-              onClick={handleOrder}
-              disabled={ordering || !publicKey}
-              className="w-full rounded-xl bg-ve-red py-3.5 text-lg font-bold text-white shadow-lg transition hover:bg-ve-red/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {ordering ? (
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Procesando...
+    <>
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Service info */}
+          <div className="space-y-6 lg:col-span-2">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <span
+                  className={`rounded-lg px-3 py-1 text-xs font-bold border-2 border-black ${
+                    service.activo
+                      ? "bg-ve-yellow text-black"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
+                  {service.activo ? "Activo" : "Pausado"}
                 </span>
-              ) : (
-                `Contratar por ${formatUSDC(service.precioUsdc.toNumber())}`
-              )}
-            </button>
-          )}
-          {isOwner && (
-            <div className="rounded-lg bg-ve-yellow/10 p-4 text-center text-sm text-ve-blue dark:text-ve-yellow">
-              Este es tu servicio. No puedes contratarte a ti mismo.
+                <span className="bg-ve-blue text-white border-2 border-black rounded-lg px-3 py-1 text-xs font-bold">
+                  {service.categoria}
+                </span>
+              </div>
+              <h1 className="text-[32px] md:text-[42px] font-bold leading-tight">
+                {service.titulo}
+              </h1>
             </div>
-          )}
-        </div>
 
-        {/* Freelancer profile sidebar */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-            Freelancer
-          </h3>
-          {freelancerProfile && (
-            <ProfileCard profile={freelancerProfile} />
-          )}
-          <Link
-            href={`/profile/${service.freelancer.toBase58()}`}
-            className="block text-center text-sm font-medium text-ve-blue hover:underline dark:text-ve-yellow"
-          >
-            Ver perfil completo →
-          </Link>
+            <div className="bg-white border-4 border-black rounded-xl p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <h3 className="text-sm font-bold text-[#393939] mb-3">Descripción</h3>
+              <p className="whitespace-pre-wrap text-[#393939] text-[16px] font-medium leading-relaxed">
+                {service.descripcion}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white border-4 border-black rounded-xl p-4 text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <div className="w-8 h-8 mx-auto mb-2 bg-[#2775CA] rounded-lg flex items-center justify-center border-2 border-black">
+                  <svg viewBox="0 0 128 128" className="w-5 h-5">
+                    <circle cx="64" cy="64" r="60" fill="white"/>
+                    <text x="64" y="82" textAnchor="middle" fill="#2775CA" fontSize="60" fontWeight="bold">$</text>
+                  </svg>
+                </div>
+                <p className="text-[20px] font-bold">{formatUSDC(service.precioUsdc.toNumber())}</p>
+                <p className="text-xs text-[#393939] font-medium">Precio</p>
+              </div>
+              <div className="bg-white border-4 border-black rounded-xl p-4 text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <div className="w-8 h-8 mx-auto mb-2 bg-ve-yellow rounded-lg flex items-center justify-center border-2 border-black">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <p className="text-[20px] font-bold">{service.deliveryDays}</p>
+                <p className="text-xs text-[#393939] font-medium">Días entrega</p>
+              </div>
+              <div className="bg-white border-4 border-black rounded-xl p-4 text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <div className="w-8 h-8 mx-auto mb-2 bg-[#9945FF] rounded-lg flex items-center justify-center border-2 border-black">
+                  <Package className="w-4 h-4 text-white" />
+                </div>
+                <p className="text-[20px] font-bold">{service.ordersCount}</p>
+                <p className="text-xs text-[#393939] font-medium">Órdenes</p>
+              </div>
+            </div>
+
+            {/* Order button */}
+            {!isOwner && service.activo && (
+              <button
+                onClick={handleOrder}
+                disabled={ordering || !publicKey}
+                className="w-full bg-ve-red text-white border-4 border-black rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                {ordering ? (
+                  <>
+                    <span className="h-5 w-5 animate-spin rounded-full border-3 border-white border-t-transparent" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    Contratar por {formatUSDC(service.precioUsdc.toNumber())}
+                  </>
+                )}
+              </button>
+            )}
+            {isOwner && (
+              <div className="bg-ve-yellow border-4 border-black rounded-xl p-4 text-center font-bold shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                Este es tu servicio. No puedes contratarte a ti mismo.
+              </div>
+            )}
+          </div>
+
+          {/* Freelancer profile sidebar */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-[#393939]">Freelancer</h3>
+            {freelancerProfile && (
+              <ProfileCard profile={freelancerProfile} />
+            )}
+            <Link
+              href={`/profile/${service.freelancer.toBase58()}`}
+              className="block text-center bg-white border-3 border-black rounded-xl py-3 font-bold text-sm hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-shadow"
+            >
+              Ver perfil completo →
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

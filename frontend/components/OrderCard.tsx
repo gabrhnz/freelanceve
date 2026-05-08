@@ -129,18 +129,18 @@ export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
   };
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="bg-white border-4 border-black rounded-xl p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <div className="mb-1 flex items-center gap-2">
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>
+            <span className={`rounded-lg px-2.5 py-0.5 text-xs font-bold border-2 border-black ${color}`}>
               {label}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs font-bold text-[#393939]">
               {formatUSDC(order.amount.toNumber())}
             </span>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-[#393939] font-medium">
             {role === "freelancer" ? "Cliente" : "Freelancer"}:{" "}
             <span className="font-mono text-xs">
               {shortWallet(
@@ -151,7 +151,7 @@ export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
             </span>
           </p>
           {(label === "En Progreso" || label === "Entregado") && (
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-[#393939]">
               Deadline: {remaining}
             </p>
           )}
@@ -162,7 +162,7 @@ export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
             <button
               onClick={handleDeliver}
               disabled={loading}
-              className="rounded-lg bg-ve-yellow px-4 py-1.5 text-xs font-bold text-gray-900 transition hover:bg-ve-yellow/90 disabled:opacity-50"
+              className="bg-ve-yellow border-3 border-black rounded-lg px-4 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow disabled:opacity-50"
             >
               {loading ? "..." : "Marcar Entregado"}
             </button>
@@ -171,7 +171,7 @@ export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
             <button
               onClick={handleApprove}
               disabled={loading}
-              className="rounded-lg bg-green-600 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-50"
+              className="bg-black text-white border-3 border-black rounded-lg px-4 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow disabled:opacity-50"
             >
               {loading ? "..." : "Aprobar Trabajo"}
             </button>
@@ -181,7 +181,7 @@ export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
               <button
                 onClick={handleRefund}
                 disabled={loading}
-                className="rounded-lg bg-ve-red px-4 py-1.5 text-xs font-bold text-white transition hover:bg-ve-red/90 disabled:opacity-50"
+                className="bg-ve-red text-white border-3 border-black rounded-lg px-4 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow disabled:opacity-50"
               >
                 {loading ? "..." : "Reembolsar"}
               </button>
