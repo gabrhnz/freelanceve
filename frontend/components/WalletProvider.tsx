@@ -10,6 +10,8 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+// @ts-ignore — types export issue in @solana-mobile/wallet-adapter-mobile
+import { SolanaMobileWalletAdapter } from "@solana-mobile/wallet-adapter-mobile";
 import { RPC_URL } from "@/lib/constants";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -20,7 +22,18 @@ interface Props {
 
 const WalletProvider: FC<Props> = ({ children }) => {
   const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    () => [
+      new SolanaMobileWalletAdapter({
+        appIdentity: {
+          name: "Wira",
+          uri: typeof window !== "undefined" ? window.location.origin : "https://frontend-mauve-kappa-18.vercel.app",
+          icon: "/icon-192.png",
+        },
+        cluster: "devnet",
+      }),
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter(),
+    ],
     []
   );
 

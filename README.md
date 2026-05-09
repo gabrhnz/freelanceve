@@ -130,6 +130,19 @@ Full audit in [`SECURITY.md`](./SECURITY.md) — highlights:
 - **Anchor constraints** — `init`, `mut`, `has_one`, `seeds`, `bump`
 - **14 custom error codes** — typed errors for every failure mode
 - **State machine** — InProgress → Delivered → Completed/Refunded
+- **Mobile Wallet Adapter** — `@solana-mobile/wallet-adapter-mobile` for Saga/Seeker support
+
+---
+
+## Solana Mobile Integration
+
+Wira supports the **Mobile Wallet Adapter (MWA)** protocol via `@solana-mobile/wallet-adapter-mobile`:
+
+- Android mobile users connect to on-device wallets (Phantom, Solflare) directly from Chrome
+- No browser extension required — native wallet app handles signing
+- Compatible with **Saga** and **Seeker** devices
+- App identity registered for secure wallet handshake
+- PWA-ready architecture for future **dApp Store** submission via TWA
 
 ---
 
