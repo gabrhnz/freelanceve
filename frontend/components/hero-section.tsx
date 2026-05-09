@@ -28,13 +28,15 @@ export function HeroSection() {
                 {t.hero.cta1}
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              className="bg-white border-[3px] border-black hover:bg-gray-50 rounded-lg py-5 px-8 md:py-[22px] md:px-[62px] text-base md:text-lg font-semibold h-auto w-full sm:w-auto sm:min-w-[240px]"
-            >
-              <Search className="w-5 h-5" />
-              {t.hero.cta2}
-            </Button>
+            <Link href="/marketplace">
+              <Button
+                variant="outline"
+                className="bg-white border-[3px] border-black hover:bg-gray-50 rounded-lg py-5 px-8 md:py-[22px] md:px-[62px] text-base md:text-lg font-semibold h-auto w-full sm:w-auto sm:min-w-[240px]"
+              >
+                <Search className="w-5 h-5" />
+                {t.hero.cta2}
+              </Button>
+            </Link>
           </div>
         </div>
 
