@@ -135,18 +135,35 @@ export async function getProfileByWallet(wallet: string) {
 }
 
 export async function upsertProfile(profile: Partial<Profile> & { email?: string | null; wallet_address?: string | null }) {
-  // Decide conflict key based on available identifier
-  let onConflict = "email";
-  if (!profile.email && profile.wallet_address) {
-    onConflict = "wallet_address";
+  // Check if profile already exists by email or wallet
+  let existing: Profile | null = null;
+  if (profile.email) {
+    existing = await getProfileByEmail(profile.email);
   }
-  const { data, error } = await supabase
-    .from("profiles")
-    .upsert(profile, { onConflict })
-    .select()
-    .single();
-  if (error) console.error(error);
-  return data as Profile | null;
+  if (!existing && profile.wallet_address) {
+    existing = await getProfileByWallet(profile.wallet_address);
+  }
+
+  if (existing) {
+    // Update existing profile
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(profile)
+      .eq("id", existing.id)
+      .select()
+      .single();
+    if (error) console.error("upsertProfile update error:", error);
+    return data as Profile | null;
+  } else {
+    // Insert new profile
+    const { data, error } = await supabase
+      .from("profiles")
+      .insert(profile)
+      .select()
+      .single();
+    if (error) console.error("upsertProfile insert error:", error);
+    return data as Profile | null;
+  }
 }
 
 export async function updateProfileById(id: string, updates: Partial<Profile>) {

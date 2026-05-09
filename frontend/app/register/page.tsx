@@ -533,9 +533,11 @@ export default function RegisterPage() {
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
-                {skills.length === 0 && (
+                {skills.length < 5 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {["Rust", "Anchor", "React", "Solana Programs", "TypeScript", "DeFi", "NFT Collections", "UI/UX Design"].map(s => (
+                    {["Rust", "Anchor", "React", "Solana Programs", "TypeScript", "DeFi", "NFT Collections", "UI/UX Design"]
+                      .filter(s => !skills.includes(s))
+                      .map(s => (
                       <button
                         key={s}
                         type="button"
