@@ -11,7 +11,7 @@ import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { getProfileByEmail, getProfileByWallet, createService, uploadFileToStorage, Profile } from "@/lib/supabase";
 import { getConnection, publishServiceOnChain } from "@/lib/program";
-import { Eye, Wallet, Clock, ShieldCheck, ExternalLink, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { Eye, Wallet, Clock, ShieldCheck, ExternalLink, Image as ImageIcon, X, Loader2, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function NewServicePage() {
@@ -31,8 +31,38 @@ export default function NewServicePage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [publishStep, setPublishStep] = useState("");
+  const [enhancing, setEnhancing] = useState(false);
 
   const precioNum = parseFloat(precio) || 0;
+
+  const handleEnhance = async () => {
+    if (!titulo.trim() && !descripcion.trim()) {
+      toast.error("Escribe al menos un título o descripción para mejorar");
+      return;
+    }
+    setEnhancing(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "enhance",
+          titulo: titulo.trim(),
+          descripcion: descripcion.trim(),
+          categoria,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.titulo) setTitulo(data.titulo);
+      if (data.descripcion) setDescripcion(data.descripcion);
+      toast.success("¡Texto mejorado con IA!");
+    } catch {
+      toast.error("Error al mejorar con IA");
+    } finally {
+      setEnhancing(false);
+    }
+  };
 
   const fetchProfile = useCallback(async () => {
     let p: Profile | null = null;
@@ -206,7 +236,21 @@ export default function NewServicePage() {
                   className="w-full border-3 border-black rounded-lg px-4 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-shadow resize-none"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-400 text-right">{descripcion.length}/500</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={handleEnhance}
+                    disabled={enhancing || (!titulo.trim() && !descripcion.trim())}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#9945FF] hover:text-[#7B2FD4] disabled:opacity-40 transition-colors"
+                  >
+                    {enhancing ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Mejorando...</>
+                    ) : (
+                      <><Sparkles className="w-3.5 h-3.5" /> Mejorar con IA</>
+                    )}
+                  </button>
+                  <span className="text-xs text-gray-400">{descripcion.length}/500</span>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
 import { Navigation } from "@/components/navigation";
 import { getServiceById, updateService, Service } from "@/lib/supabase";
-import { Eye, Clock, Save } from "lucide-react";
+import { Eye, Clock, Save, Sparkles, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function EditServicePage() {
@@ -22,7 +22,32 @@ export default function EditServicePage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  const [enhancing, setEnhancing] = useState(false);
   const precioNum = parseFloat(precio) || 0;
+
+  const handleEnhance = async () => {
+    if (!titulo.trim() && !descripcion.trim()) {
+      toast.error("Escribe al menos un título o descripción");
+      return;
+    }
+    setEnhancing(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "enhance", titulo: titulo.trim(), descripcion: descripcion.trim(), categoria }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.titulo) setTitulo(data.titulo);
+      if (data.descripcion) setDescripcion(data.descripcion);
+      toast.success("¡Mejorado con IA!");
+    } catch {
+      toast.error("Error al mejorar con IA");
+    } finally {
+      setEnhancing(false);
+    }
+  };
 
   const fetchService = useCallback(async () => {
     const s = await getServiceById(serviceId);
@@ -131,7 +156,13 @@ export default function EditServicePage() {
                   className="w-full border-3 border-black rounded-lg px-4 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-shadow resize-none"
                   required
                 />
-                <p className="mt-1 text-xs text-gray-400 text-right">{descripcion.length}/500</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <button type="button" onClick={handleEnhance} disabled={enhancing || (!titulo.trim() && !descripcion.trim())}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#9945FF] hover:text-[#7B2FD4] disabled:opacity-40 transition-colors">
+                    {enhancing ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Mejorando...</> : <><Sparkles className="w-3.5 h-3.5" /> Mejorar con IA</>}
+                  </button>
+                  <span className="text-xs text-gray-400">{descripcion.length}/500</span>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

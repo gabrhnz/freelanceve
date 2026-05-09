@@ -94,9 +94,19 @@ Every transaction is verifiable on [Solana Explorer](https://explorer.solana.com
 | `EscrowAuthority` | `["escrow", order]` | PDA signer for token transfers |
 | `EscrowTokenAccount` | `["escrow_token", order]` | SPL token account holding USDC |
 
+### AI-Powered Features (OpenRouter + Llama 3.1)
+
+| Feature | What it does |
+|---------|-------------|
+| **Smart Search** | Natural language queries ranked by AI semantic relevance |
+| **Service Enhancer** | One-click AI copywriting for service titles & descriptions |
+| **Live Translation** | Auto-translates service listings when user switches language |
+
+All AI features use `meta-llama/llama-3.1-8b-instruct` via OpenRouter — fast, cheap, and reliable.
+
 ### Off-Chain (Next.js Frontend)
 
-- **Marketplace** — Browse, search, filter services by category
+- **Marketplace** — Browse, search, filter services by category + AI-powered smart search
 - **Service Publishing** — Create service → sign on-chain (register_freelancer + create_service)
 - **USDC Escrow Payment** — One-click hire → wallet signs `place_order` → USDC locked
 - **Order Management** — Full lifecycle: accept → deliver → approve/refund
@@ -127,6 +137,7 @@ Every transaction is verifiable on [Solana Explorer](https://explorer.solana.com
 | **Auth** | Email OTP + Wallet signature | Accessible to non-crypto users |
 | **Email** | Resend API | Transactional emails (OTP, notifications) |
 | **File Security** | VirusTotal API | Malware scanning before file storage |
+| **AI/LLM** | OpenRouter (Llama 3.1 8B) | Smart search, copywriting, live translation |
 | **Hosting** | Vercel | Edge functions, instant deploys |
 
 ---

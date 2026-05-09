@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Navigation } from "@/components/navigation";
 import { CATEGORIES } from "@/lib/constants";
 import { getServices, Service } from "@/lib/supabase";
-import { Search, SlidersHorizontal, Briefcase, Clock, X } from "lucide-react";
+import { Search, SlidersHorizontal, Briefcase, Clock, X, Sparkles, Languages } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
+import toast from "react-hot-toast";
 
 export default function MarketplacePage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -13,21 +15,98 @@ export default function MarketplacePage() {
   const [search, setSearch] = useState("");
   const [categoria, setCategoria] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [aiSearch, setAiSearch] = useState(false);
+  const [aiSearching, setAiSearching] = useState(false);
+  const [translatedServices, setTranslatedServices] = useState<Record<string, { titulo: string; descripcion: string }>>({})
+  const [translating, setTranslating] = useState(false);
+  const { language } = useLanguage();
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
     const data = await getServices({
       categoria: categoria !== "all" ? categoria : undefined,
-      search: search.trim() || undefined,
+      search: !aiSearch ? (search.trim() || undefined) : undefined,
     });
+
+    // If AI search is on and there's a query, rank results with AI
+    if (aiSearch && search.trim() && data.length > 0) {
+      setAiSearching(true);
+      try {
+        const res = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "search",
+            query: search.trim(),
+            services: data.map(s => ({ id: s.id, titulo: s.titulo, descripcion: s.descripcion, categoria: s.categoria, precio_usdc: s.precio_usdc })),
+          }),
+        });
+        if (res.ok) {
+          const { rankedIds } = await res.json();
+          if (rankedIds?.length > 0) {
+            const idOrder = new Map(rankedIds.map((id: string, i: number) => [id, i]));
+            const ranked = [...data].sort((a, b) => {
+              const ai = idOrder.get(a.id) ?? 999;
+              const bi = idOrder.get(b.id) ?? 999;
+              return (ai as number) - (bi as number);
+            });
+            setServices(ranked);
+            setLoading(false);
+            setAiSearching(false);
+            return;
+          }
+        }
+      } catch {
+        // Fallback to normal results
+      }
+      setAiSearching(false);
+    }
+
     setServices(data);
     setLoading(false);
-  }, [categoria, search]);
+
+    // Auto-translate if language is English and services are in Spanish
+    if (language === "en" && data.length > 0) {
+      translateServices(data);
+    } else {
+      setTranslatedServices({});
+    }
+  }, [categoria, search, aiSearch, language]);
+
+  const translateServices = async (svcs: Service[]) => {
+    setTranslating(true);
+    try {
+      const texts: Record<string, string> = {};
+      for (const s of svcs.slice(0, 12)) {
+        texts[`t_${s.id}`] = s.titulo;
+        texts[`d_${s.id}`] = (s.descripcion || "").slice(0, 120);
+      }
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "translate", texts, targetLang: "en" }),
+      });
+      if (res.ok) {
+        const { translations } = await res.json();
+        const mapped: Record<string, { titulo: string; descripcion: string }> = {};
+        for (const s of svcs) {
+          if (translations[`t_${s.id}`] || translations[`d_${s.id}`]) {
+            mapped[s.id] = {
+              titulo: translations[`t_${s.id}`] || s.titulo,
+              descripcion: translations[`d_${s.id}`] || s.descripcion || "",
+            };
+          }
+        }
+        setTranslatedServices(mapped);
+      }
+    } catch {}
+    setTranslating(false);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchServices();
-    }, 300);
+    }, 500);
     return () => clearTimeout(timer);
   }, [fetchServices]);
 
@@ -53,17 +132,27 @@ export default function MarketplacePage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar servicios..."
-              className="w-full border-4 border-black rounded-xl pl-12 pr-4 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow"
+              placeholder={aiSearch ? "Describe lo que necesitas..." : "Buscar servicios..."}
+              className={`w-full border-4 rounded-xl pl-12 pr-20 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow ${
+                aiSearch ? "border-[#9945FF] bg-purple-50/30" : "border-black"
+              }`}
             />
-            {search && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {search && (
+                <button onClick={() => setSearch("")} className="p-1">
+                  <X className="w-4 h-4 text-[#393939]" />
+                </button>
+              )}
               <button
-                onClick={() => setSearch("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2"
+                onClick={() => { setAiSearch(!aiSearch); if (!aiSearch) toast("Búsqueda inteligente activada", { icon: "✨" }); }}
+                className={`p-1.5 rounded-lg transition-all ${
+                  aiSearch ? "bg-[#9945FF] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" : "text-[#393939] hover:text-[#9945FF]"
+                }`}
+                title={aiSearch ? "Desactivar búsqueda IA" : "Activar búsqueda inteligente"}
               >
-                <X className="w-4 h-4 text-[#393939]" />
+                <Sparkles className="w-4 h-4" />
               </button>
-            )}
+            </div>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -109,6 +198,10 @@ export default function MarketplacePage() {
         {!loading && (
           <p className="text-sm font-bold text-[#393939] mb-4">
             {services.length} servicio{services.length !== 1 ? "s" : ""} encontrado{services.length !== 1 ? "s" : ""}
+            {aiSearch && search.trim() && <span className="ml-2 text-[#9945FF]">✨ Ordenado por IA</span>}
+            {aiSearching && <span className="ml-2 text-[#9945FF] animate-pulse">⏳ Analizando...</span>}
+            {translating && <span className="ml-2 text-[#9945FF] animate-pulse">🌐 Traduciendo...</span>}
+            {!translating && Object.keys(translatedServices).length > 0 && <span className="ml-2 text-[#9945FF]">🌐 AI Translated</span>}
           </p>
         )}
 
@@ -141,13 +234,13 @@ export default function MarketplacePage() {
 
                   {/* Title */}
                   <h3 className="mb-1 text-lg font-bold group-hover:underline">
-                    {service.titulo}
+                    {translatedServices[service.id]?.titulo || service.titulo}
                   </h3>
 
                   {/* Description */}
                   {service.descripcion && (
                     <p className="mb-3 line-clamp-2 text-sm text-[#393939] font-medium flex-1">
-                      {service.descripcion}
+                      {translatedServices[service.id]?.descripcion || service.descripcion}
                     </p>
                   )}
 
