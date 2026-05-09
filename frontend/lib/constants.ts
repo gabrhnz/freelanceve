@@ -5,7 +5,7 @@ export const PROGRAM_ID = new PublicKey(
 );
 
 export const USDC_MINT_DEVNET = new PublicKey(
-  "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+  "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
 );
 
 export const CLUSTER = "devnet" as const;

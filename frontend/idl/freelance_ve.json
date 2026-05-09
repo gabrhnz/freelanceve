@@ -154,7 +154,8 @@
           { "name": "status", "type": { "defined": "OrderStatus" } },
           { "name": "deadline", "type": "i64" },
           { "name": "createdAt", "type": "i64" },
-          { "name": "bump", "type": "u8" }
+          { "name": "bump", "type": "u8" },
+          { "name": "escrowBump", "type": "u8" }
         ]
       }
     }
@@ -182,5 +183,9 @@
     { "code": 6005, "name": "InvalidDeliveryDays", "msg": "Delivery days must be between 1 and 30" },
     { "code": 6006, "name": "NameTooLong", "msg": "Name must be 50 characters or less" },
     { "code": 6007, "name": "BioTooLong", "msg": "Bio must be 200 characters or less" }
-  ]
+  ],
+  "metadata": {
+    "address": "6zjwrFhvtcub6FYvb3kZCGTXLT3pzH2fQmyjFhM5WQSb"
+  }
 }
+

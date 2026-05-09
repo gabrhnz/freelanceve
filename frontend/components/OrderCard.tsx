@@ -1,135 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { PublicKey } from "@solana/web3.js";
 import { useAnchorWallet, useWallet } from "@solana/wallet-adapter-react";
-import { getProgram, findProfilePDA, findEscrowAuthorityPDA, findEscrowTokenPDA } from "@/lib/anchor";
-import { USDC_MINT_DEVNET } from "@/lib/constants";
 import { formatUSDC, shortWallet, statusLabel, statusColor, timeRemaining } from "@/lib/utils";
-import toast from "react-hot-toast";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
-
-interface OrderData {
-  client: PublicKey;
-  freelancer: PublicKey;
-  service: PublicKey;
-  amount: { toNumber: () => number };
-  status: { inProgress?: object; delivered?: object; completed?: object; refunded?: object };
-  deadline: { toNumber: () => number };
-  createdAt: { toNumber: () => number };
-  bump: number;
-}
+import { getOrdersByUser, getProfileByWallet, Order as DbOrder } from "@/lib/supabase";
+import { Clock, CheckCircle, Package, AlertTriangle, ArrowRight } from "lucide-react";
 
 interface OrderCardProps {
-  order: OrderData;
+  order: {
+    client: PublicKey;
+    freelancer: PublicKey;
+    service: PublicKey;
+    amount: { toNumber: () => number };
+    status: { inProgress?: object; delivered?: object; completed?: object; refunded?: object };
+    deadline: { toNumber: () => number };
+    createdAt: { toNumber: () => number };
+    bump: number;
+  };
   orderKey: PublicKey;
   role: "freelancer" | "client";
 }
 
 export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
-  const wallet = useAnchorWallet();
   const { publicKey } = useWallet();
-  const [loading, setLoading] = useState(false);
+  const [dbOrderId, setDbOrderId] = useState<string | null>(null);
 
   const label = statusLabel(order.status);
   const color = statusColor(order.status);
   const deadline = order.deadline.toNumber();
   const remaining = timeRemaining(deadline);
 
-  const handleDeliver = async () => {
-    if (!wallet || !publicKey) return;
-    setLoading(true);
-    try {
-      const program = getProgram(wallet);
-      await program.methods
-        .deliverOrder()
-        .accounts({
-          order: orderKey,
-          freelancer: publicKey,
-        })
-        .rpc();
-      toast.success("Orden marcada como entregada");
-      window.location.reload();
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Error al entregar");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApprove = async () => {
-    if (!wallet || !publicKey) return;
-    setLoading(true);
-    try {
-      const program = getProgram(wallet);
-      const [escrowAuthority] = findEscrowAuthorityPDA(orderKey);
-      const [escrowToken] = findEscrowTokenPDA(orderKey);
-      const [freelancerProfile] = findProfilePDA(order.freelancer);
-
-      const freelancerUsdc = await getAssociatedTokenAddress(
-        USDC_MINT_DEVNET,
-        order.freelancer
+  // Try to find matching Supabase order
+  useEffect(() => {
+    async function findDbOrder() {
+      if (!publicKey) return;
+      const profile = await getProfileByWallet(publicKey.toBase58());
+      if (!profile) return;
+      const orders = await getOrdersByUser(profile.id);
+      // Match by amount (micro USDC vs regular USDC)
+      const amountUsdc = order.amount.toNumber() / 1_000_000;
+      const match = orders.find(
+        (o) =>
+          Math.abs(o.amount_usdc - amountUsdc) < 0.01 &&
+          ["pending", "accepted", "in_progress", "delivered", "completed", "refunded"].includes(o.status)
       );
-
-      await program.methods
-        .approveOrder()
-        .accounts({
-          order: orderKey,
-          escrowUsdc: escrowToken,
-          escrowAuthority: escrowAuthority,
-          freelancerUsdc: freelancerUsdc,
-          freelancerProfile: freelancerProfile,
-          client: publicKey,
-          tokenProgram: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-        })
-        .rpc();
-      toast.success("¡Trabajo aprobado! USDC liberado al freelancer.");
-      window.location.reload();
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Error al aprobar");
-    } finally {
-      setLoading(false);
+      if (match) setDbOrderId(match.id);
     }
-  };
+    findDbOrder();
+  }, [publicKey, order.amount]);
 
-  const handleRefund = async () => {
-    if (!wallet || !publicKey) return;
-    setLoading(true);
-    try {
-      const program = getProgram(wallet);
-      const [escrowAuthority] = findEscrowAuthorityPDA(orderKey);
-      const [escrowToken] = findEscrowTokenPDA(orderKey);
-
-      const clientUsdc = await getAssociatedTokenAddress(
-        USDC_MINT_DEVNET,
-        order.client
-      );
-
-      await program.methods
-        .refundOrder()
-        .accounts({
-          order: orderKey,
-          escrowUsdc: escrowToken,
-          escrowAuthority: escrowAuthority,
-          clientUsdc: clientUsdc,
-          signer: publicKey,
-          tokenProgram: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-        })
-        .rpc();
-      toast.success("Reembolso procesado exitosamente");
-      window.location.reload();
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Error al reembolsar");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="bg-white border-4 border-black rounded-xl p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+  const card = (
+    <div className="bg-white border-4 border-black rounded-xl p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-shadow">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <div className="mb-1 flex items-center gap-2">
@@ -157,37 +80,16 @@ export default function OrderCard({ order, orderKey, role }: OrderCardProps) {
           )}
         </div>
 
-        <div className="flex gap-2">
-          {role === "freelancer" && label === "En Progreso" && (
-            <button
-              onClick={handleDeliver}
-              disabled={loading}
-              className="bg-ve-yellow border-3 border-black rounded-lg px-4 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow disabled:opacity-50"
-            >
-              {loading ? "..." : "Marcar Entregado"}
-            </button>
-          )}
-          {role === "client" && label === "Entregado" && (
-            <button
-              onClick={handleApprove}
-              disabled={loading}
-              className="bg-black text-white border-3 border-black rounded-lg px-4 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow disabled:opacity-50"
-            >
-              {loading ? "..." : "Aprobar Trabajo"}
-            </button>
-          )}
-          {(label === "En Progreso" || label === "Entregado") &&
-            remaining === "Vencido" && (
-              <button
-                onClick={handleRefund}
-                disabled={loading}
-                className="bg-ve-red text-white border-3 border-black rounded-lg px-4 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow disabled:opacity-50"
-              >
-                {loading ? "..." : "Reembolsar"}
-              </button>
-            )}
+        <div className="flex items-center gap-2 shrink-0">
+          <ArrowRight className="w-5 h-5 text-[#393939]" />
         </div>
       </div>
     </div>
   );
+
+  if (dbOrderId) {
+    return <Link href={`/orders/${dbOrderId}`}>{card}</Link>;
+  }
+
+  return card;
 }

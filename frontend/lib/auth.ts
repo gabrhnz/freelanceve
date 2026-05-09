@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
 const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "solancework-dev-secret-key-change-in-production"
+  process.env.JWT_SECRET || "wira-dev-secret-key-change-in-production"
 );
 
 export interface UserSession {

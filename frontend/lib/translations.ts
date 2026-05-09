@@ -122,7 +122,7 @@ export const translations = {
       newsletter: 'Get notified about new features',
       subscribe: 'Subscribe',
       emailPlaceholder: 'Enter your email address',
-      brand: 'SolanceWork',
+      brand: 'Wira',
       brandDescription: 'The freelance marketplace powered by Solana. Fast payments, low fees, global reach.',
       platform: 'Platform',
       browseServices: 'Browse Services',
@@ -137,7 +137,7 @@ export const translations = {
       privacy: 'Privacy Policy',
       contact: 'Contact',
       discord: 'Discord Community',
-      copyright: 'SolanceWork - Freelancing on Solana with USDC',
+      copyright: 'Wira - Freelancing on Solana with USDC',
     },
     // Login
     login: {
@@ -321,7 +321,7 @@ export const translations = {
       newsletter: 'Recibe notificaciones sobre nuevas funciones',
       subscribe: 'Suscribirse',
       emailPlaceholder: 'Ingresa tu correo electronico',
-      brand: 'SolanceWork',
+      brand: 'Wira',
       brandDescription: 'El marketplace freelance impulsado por Solana. Pagos rapidos, bajas comisiones, alcance global.',
       platform: 'Plataforma',
       browseServices: 'Explorar Servicios',
@@ -336,7 +336,7 @@ export const translations = {
       privacy: 'Politica de Privacidad',
       contact: 'Contacto',
       discord: 'Comunidad Discord',
-      copyright: 'SolanceWork - Freelancing en Solana con USDC',
+      copyright: 'Wira - Freelancing en Solana con USDC',
     },
     // Login
     login: {

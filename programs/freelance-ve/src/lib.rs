@@ -118,6 +118,7 @@ pub mod freelance_ve {
         order.deadline = deadline;
         order.created_at = now;
         order.bump = ctx.bumps.order;
+        order.escrow_bump = ctx.bumps.escrow_authority;
 
         // Transfer USDC from client to escrow
         let cpi_accounts = Transfer {
@@ -151,7 +152,7 @@ pub mod freelance_ve {
     }
 
     pub fn approve_order(ctx: Context<ApproveOrder>) -> Result<()> {
-        let order_bump = ctx.accounts.order.bump;
+        let order_bump = ctx.accounts.order.escrow_bump;
         let order_amount = ctx.accounts.order.amount;
         let order_key = ctx.accounts.order.key();
 
@@ -192,7 +193,7 @@ pub mod freelance_ve {
     }
 
     pub fn refund_order(ctx: Context<RefundOrder>) -> Result<()> {
-        let order_bump = ctx.accounts.order.bump;
+        let order_bump = ctx.accounts.order.escrow_bump;
         let order_amount = ctx.accounts.order.amount;
         let order_key = ctx.accounts.order.key();
 
@@ -435,10 +436,11 @@ pub struct Order {
     pub deadline: i64,        // 8
     pub created_at: i64,      // 8
     pub bump: u8,             // 1
+    pub escrow_bump: u8,      // 1
 }
 
 impl Order {
-    pub const MAX_SIZE: usize = 32 + 32 + 32 + 8 + 1 + 8 + 8 + 1;
+    pub const MAX_SIZE: usize = 32 + 32 + 32 + 8 + 1 + 8 + 8 + 1 + 1;
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq)]

@@ -13,9 +13,9 @@ const onest = Onest({
 });
 
 export const metadata: Metadata = {
-  title: "SolanceWork — Freelance Marketplace | Pay with USDC on Solana",
+  title: "Wira — Freelance Marketplace on Solana | Pay with USDC",
   description:
-    "The first freelance marketplace powered by Solana. Fast transactions, low fees, and secure payments with USDC stablecoin.",
+    "Wira is a decentralized freelance marketplace powered by Solana. Fast transactions, low fees, and secure escrow payments with USDC.",
 };
 
 export default function RootLayout({

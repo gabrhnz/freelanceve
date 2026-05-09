@@ -21,13 +21,13 @@ export async function POST(req: NextRequest) {
     // Send email via Resend
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM || "SolanceWork <onboarding@resend.dev>",
+      const { data, error: resendError } = await resend.emails.send({
+        from: process.env.EMAIL_FROM || "Wira <noreply@billete.lat>",
         to: email,
-        subject: "Tu código de acceso - SolanceWork",
+        subject: "Tu código de acceso - Wira",
         html: `
           <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 32px; border: 4px solid black; border-radius: 16px;">
-            <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">SolanceWork</h1>
+            <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">Wira</h1>
             <p style="color: #393939; font-size: 16px;">Tu código de verificación es:</p>
             <div style="background: #F4D03F; border: 3px solid black; border-radius: 12px; padding: 16px; text-align: center; margin: 24px 0; box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);">
               <span style="font-size: 32px; font-weight: 800; letter-spacing: 8px;">${code}</span>
@@ -37,9 +37,17 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       });
+
+      if (resendError) {
+        console.error("Resend error:", resendError);
+        return NextResponse.json(
+          { error: `Error de email: ${resendError.message}` },
+          { status: 500 }
+        );
+      }
+      console.log("Resend success, id:", data?.id);
     } else {
-      // Dev mode: log OTP to console
-      console.log(`[DEV] OTP for ${email}: ${code}`);
+      console.log(`[DEV] No RESEND_API_KEY set. OTP for ${email}: ${code}`);
     }
 
     return NextResponse.json({ success: true, message: "Código enviado" });

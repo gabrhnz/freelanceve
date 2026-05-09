@@ -9,6 +9,7 @@ import { Navigation } from "@/components/navigation";
 import { useSession } from "@/contexts/session-context";
 import { Briefcase, User, Users, ArrowRight, ArrowLeft, X, Plus, Mail, Wallet, Check } from "lucide-react";
 import toast from "react-hot-toast";
+import { upsertProfile, getProfileByEmail, getProfileByWallet } from "@/lib/supabase";
 
 type Role = "freelancer" | "employer" | "both";
 
@@ -57,12 +58,27 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // If already logged in via session, skip to step 2
+  // If already logged in and has profile, go to dashboard
   useEffect(() => {
-    if (user && step === 1) {
-      setStep(2);
+    async function checkExisting() {
+      if (user?.email) {
+        const p = await getProfileByEmail(user.email);
+        if (p) {
+          router.push("/dashboard");
+          return;
+        }
+        // Has session but no profile — continue registration
+        if (step === 1) setStep(2);
+      } else if (publicKey) {
+        const p = await getProfileByWallet(publicKey.toBase58());
+        if (p) {
+          router.push("/dashboard");
+          return;
+        }
+      }
     }
-  }, [user, step]);
+    checkExisting();
+  }, [user, publicKey, step, router]);
 
   const handleSendOTP = async () => {
     if (!email || !email.includes("@")) {
@@ -103,11 +119,36 @@ export default function RegisterPage() {
     }
   };
 
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 0) return;
+    const newOtp = [...otp];
+    for (let i = 0; i < pasted.length; i++) {
+      newOtp[i] = pasted[i];
+    }
+    setOtp(newOtp);
+    // Focus last filled or next empty
+    const focusIdx = Math.min(pasted.length, 5);
+    otpRefs.current[focusIdx]?.focus();
+    // Auto-verify if full
+    if (newOtp.every((d) => d) && newOtp.join("").length === 6) {
+      handleVerifyOTP(newOtp.join(""));
+    }
+  };
+
   const handleVerifyOTP = async (code: string) => {
     setVerifyingOtp(true);
     const result = await verifyOTP(email, code);
     setVerifyingOtp(false);
     if (result.success) {
+      // Check if profile already exists
+      const existing = await getProfileByEmail(email);
+      if (existing) {
+        toast.success("¡Bienvenido de vuelta!");
+        router.push("/dashboard");
+        return;
+      }
       toast.success("¡Verificado! Continúa tu registro");
       setStep(2);
     } else {
@@ -115,6 +156,20 @@ export default function RegisterPage() {
       setOtp(["", "", "", "", "", ""]);
       otpRefs.current[0]?.focus();
     }
+  };
+
+  const addSkills = (input: string) => {
+    const parts = input.split(",");
+    const last = parts.pop() || "";
+    const newSkills = [...skills];
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed && newSkills.length < 5 && !newSkills.includes(trimmed)) {
+        newSkills.push(trimmed);
+      }
+    }
+    setSkills(newSkills);
+    setSkillInput(last);
   };
 
   const addSkill = () => {
@@ -135,14 +190,40 @@ export default function RegisterPage() {
       return;
     }
 
+    const userEmail = user?.email || email || null;
+    const walletAddr = publicKey ? publicKey.toBase58() : null;
+
+    if (!userEmail && !walletAddr) {
+      toast.error("Necesitas un email o wallet para registrarte");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Update the session profile with role, name, and optional wallet
-      await updateProfile({
-        nombre,
+      // Save profile to Supabase
+      const profile = await upsertProfile({
+        ...(userEmail ? { email: userEmail } : {}),
+        nombre: nombre.trim(),
+        bio: bio.trim() || null,
         role: role || "freelancer",
-        ...(publicKey && { walletAddress: publicKey.toBase58() }),
+        categoria: categoria || null,
+        skills,
+        wallet_address: walletAddr,
       });
+
+      if (!profile) {
+        toast.error("Error al guardar perfil");
+        return;
+      }
+
+      // Update JWT session if we have one
+      if (user) {
+        await updateProfile({
+          nombre,
+          role: role || "freelancer",
+          ...(publicKey && { walletAddress: publicKey.toBase58() }),
+        });
+      }
 
       toast.success("¡Perfil creado exitosamente!");
       router.push("/dashboard");
@@ -183,7 +264,7 @@ export default function RegisterPage() {
           <div className="space-y-8">
             <div className="text-center">
               <h1 className="text-[36px] md:text-[48px] font-bold leading-tight">
-                Únete a <span className="bg-ve-yellow px-2">SolanceWork</span>
+                Únete a <span className="bg-ve-yellow px-2">Wira</span>
               </h1>
               <p className="text-[#393939] text-[16px] font-medium mt-3 max-w-md mx-auto">
                 Ingresa tu email para comenzar. Tu wallet la puedes conectar después.
@@ -230,7 +311,7 @@ export default function RegisterPage() {
                   </p>
                 </div>
 
-                <div className="flex justify-center gap-2">
+                <div className="flex justify-center gap-3">
                   {otp.map((digit, i) => (
                     <input
                       key={i}
@@ -241,7 +322,8 @@ export default function RegisterPage() {
                       value={digit}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className="w-12 h-14 border-3 border-black rounded-lg text-center text-[24px] font-bold focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-shadow"
+                      onPaste={handleOtpPaste}
+                      className="w-12 h-14 border-4 border-black rounded-xl text-center text-[24px] font-bold bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] focus:outline-none transition-all"
                     />
                   ))}
                 </div>
@@ -308,7 +390,7 @@ export default function RegisterPage() {
                 Elige tu <span className="bg-ve-yellow px-2">rol</span>
               </h1>
               <p className="text-[#393939] text-[16px] font-medium mt-3 max-w-md mx-auto">
-                Selecciona cómo quieres usar SolanceWork
+                Selecciona cómo quieres usar Wira
               </p>
             </div>
 
@@ -418,7 +500,7 @@ export default function RegisterPage() {
                   <input
                     type="text"
                     value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
+                    onChange={(e) => addSkills(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
                     maxLength={30}
                     placeholder="Ej: React, Solidity, Diseño UI..."

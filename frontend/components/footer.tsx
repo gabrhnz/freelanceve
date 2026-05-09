@@ -65,7 +65,7 @@ export function Footer() {
                     </text>
                   </svg>
                 </div>
-                <span className="text-lg md:text-xl font-bold">SolanceWork</span>
+                <span className="text-lg md:text-xl font-bold">Wira</span>
               </div>
               <p className="text-gray-400 mb-6 text-sm leading-relaxed">
                 The freelance marketplace powered by Solana. Fast payments, low
@@ -172,10 +172,10 @@ export function Footer() {
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   <a
-                    href="mailto:support@solancework.com"
+                    href="mailto:support@wira.work"
                     className="hover:text-white transition-colors"
                   >
-                    support@solancework.com
+                    support@wira.work
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export function Footer() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p>SolanceWork - Freelancing on Solana with USDC</p>
+            <p>Wira - Freelancing on Solana with USDC</p>
           </div>
         </div>
       </div>

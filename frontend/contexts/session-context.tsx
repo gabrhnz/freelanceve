@@ -1,17 +1,19 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { getProfileByEmail, Profile } from "@/lib/supabase";
 
-interface User {
+interface SessionUser {
   email: string;
   role?: string;
   nombre?: string;
   walletAddress?: string;
-  createdAt: number;
+  profileId?: string;
 }
 
 interface SessionContextType {
-  user: User | null;
+  user: SessionUser | null;
+  profile: Profile | null;
   loading: boolean;
   sendOTP: (email: string) => Promise<{ success: boolean; error?: string }>;
   verifyOTP: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
@@ -22,6 +24,7 @@ interface SessionContextType {
 
 const SessionContext = createContext<SessionContextType>({
   user: null,
+  profile: null,
   loading: true,
   sendOTP: async () => ({ success: false }),
   verifyOTP: async () => ({ success: false }),
@@ -31,16 +34,35 @@ const SessionContext = createContext<SessionContextType>({
 });
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchSession = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/session");
       const data = await res.json();
-      setUser(data.user || null);
+      if (data.user) {
+        setUser(data.user);
+        // Load Supabase profile
+        const p = await getProfileByEmail(data.user.email);
+        setProfile(p);
+        if (p) {
+          setUser((prev) => prev ? {
+            ...prev,
+            nombre: p.nombre,
+            role: p.role,
+            walletAddress: p.wallet_address || undefined,
+            profileId: p.id,
+          } : prev);
+        }
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
     } catch {
       setUser(null);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -96,10 +118,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await fetch("/api/auth/session", { method: "DELETE" });
     setUser(null);
+    setProfile(null);
   };
 
   return (
-    <SessionContext.Provider value={{ user, loading, sendOTP, verifyOTP, updateProfile, logout, refetch: fetchSession }}>
+    <SessionContext.Provider value={{ user, profile, loading, sendOTP, verifyOTP, updateProfile, logout, refetch: fetchSession }}>
       {children}
     </SessionContext.Provider>
   );
