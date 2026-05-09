@@ -64,44 +64,7 @@ export default function MarketplacePage() {
 
     setServices(data);
     setLoading(false);
-
-    // Auto-translate if language is English and services are in Spanish
-    if (language === "en" && data.length > 0) {
-      translateServices(data);
-    } else {
-      setTranslatedServices({});
-    }
-  }, [categoria, search, aiSearch, language]);
-
-  const translateServices = async (svcs: Service[]) => {
-    setTranslating(true);
-    try {
-      const texts: Record<string, string> = {};
-      for (const s of svcs.slice(0, 12)) {
-        texts[`t_${s.id}`] = s.titulo;
-        texts[`d_${s.id}`] = (s.descripcion || "").slice(0, 120);
-      }
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "translate", texts, targetLang: "en" }),
-      });
-      if (res.ok) {
-        const { translations } = await res.json();
-        const mapped: Record<string, { titulo: string; descripcion: string }> = {};
-        for (const s of svcs) {
-          if (translations[`t_${s.id}`] || translations[`d_${s.id}`]) {
-            mapped[s.id] = {
-              titulo: translations[`t_${s.id}`] || s.titulo,
-              descripcion: translations[`d_${s.id}`] || s.descripcion || "",
-            };
-          }
-        }
-        setTranslatedServices(mapped);
-      }
-    } catch {}
-    setTranslating(false);
-  };
+  }, [categoria, search, aiSearch]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -109,6 +72,46 @@ export default function MarketplacePage() {
     }, 500);
     return () => clearTimeout(timer);
   }, [fetchServices]);
+
+  // Translate services when language changes to English
+  useEffect(() => {
+    if (language !== "en" || services.length === 0) {
+      setTranslatedServices({});
+      return;
+    }
+    let cancelled = false;
+    const translateServices = async () => {
+      setTranslating(true);
+      try {
+        const texts: Record<string, string> = {};
+        for (const s of services.slice(0, 12)) {
+          texts[`t_${s.id}`] = s.titulo;
+          texts[`d_${s.id}`] = (s.descripcion || "").slice(0, 120);
+        }
+        const res = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "translate", texts, targetLang: "en" }),
+        });
+        if (res.ok && !cancelled) {
+          const { translations } = await res.json();
+          const mapped: Record<string, { titulo: string; descripcion: string }> = {};
+          for (const s of services) {
+            if (translations[`t_${s.id}`] || translations[`d_${s.id}`]) {
+              mapped[s.id] = {
+                titulo: translations[`t_${s.id}`] || s.titulo,
+                descripcion: translations[`d_${s.id}`] || s.descripcion || "",
+              };
+            }
+          }
+          setTranslatedServices(mapped);
+        }
+      } catch {}
+      if (!cancelled) setTranslating(false);
+    };
+    translateServices();
+    return () => { cancelled = true; };
+  }, [language, services]);
 
   return (
     <>
