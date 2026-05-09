@@ -192,7 +192,7 @@ export default function RegisterPage() {
       return;
     }
 
-    const userEmail = user?.email || email || null;
+    const userEmail = (user?.email && user.email.trim()) || (email && email.trim()) || null;
     const walletAddr = publicKey ? publicKey.toBase58() : null;
 
     if (!userEmail && !walletAddr) {
@@ -210,11 +210,17 @@ export default function RegisterPage() {
         role: role || "freelancer",
         categoria: categoria || null,
         skills,
-        wallet_address: walletAddr,
+        ...(walletAddr ? { wallet_address: walletAddr } : {}),
       });
 
       if (!profile) {
-        toast.error("Error al guardar perfil");
+        toast.error("Error al guardar perfil. Revisa la consola.");
+        console.error("upsertProfile returned null. Payload:", {
+          email: userEmail,
+          wallet_address: walletAddr,
+          nombre: nombre.trim(),
+          role: role || "freelancer",
+        });
         return;
       }
 
