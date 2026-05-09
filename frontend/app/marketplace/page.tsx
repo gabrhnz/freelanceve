@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Navigation } from "@/components/navigation";
 import { CATEGORIES } from "@/lib/constants";
 import { getServices, Service } from "@/lib/supabase";
-import { Search, SlidersHorizontal, Briefcase, Clock, X, Sparkles, Languages } from "lucide-react";
+import { Search, SlidersHorizontal, Briefcase, Clock, X, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import toast from "react-hot-toast";
 
@@ -17,9 +17,7 @@ export default function MarketplacePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [aiSearch, setAiSearch] = useState(false);
   const [aiSearching, setAiSearching] = useState(false);
-  const [translatedServices, setTranslatedServices] = useState<Record<string, { titulo: string; descripcion: string }>>({})
-  const [translating, setTranslating] = useState(false);
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -73,46 +71,6 @@ export default function MarketplacePage() {
     return () => clearTimeout(timer);
   }, [fetchServices]);
 
-  // Translate services when language changes to English
-  useEffect(() => {
-    if (language !== "en" || services.length === 0) {
-      setTranslatedServices({});
-      return;
-    }
-    let cancelled = false;
-    const translateServices = async () => {
-      setTranslating(true);
-      try {
-        const texts: Record<string, string> = {};
-        for (const s of services.slice(0, 12)) {
-          texts[`t_${s.id}`] = s.titulo;
-          texts[`d_${s.id}`] = (s.descripcion || "").slice(0, 120);
-        }
-        const res = await fetch("/api/ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "translate", texts, targetLang: "en" }),
-        });
-        if (res.ok && !cancelled) {
-          const { translations } = await res.json();
-          const mapped: Record<string, { titulo: string; descripcion: string }> = {};
-          for (const s of services) {
-            if (translations[`t_${s.id}`] || translations[`d_${s.id}`]) {
-              mapped[s.id] = {
-                titulo: translations[`t_${s.id}`] || s.titulo,
-                descripcion: translations[`d_${s.id}`] || s.descripcion || "",
-              };
-            }
-          }
-          setTranslatedServices(mapped);
-        }
-      } catch {}
-      if (!cancelled) setTranslating(false);
-    };
-    translateServices();
-    return () => { cancelled = true; };
-  }, [language, services]);
-
   return (
     <>
       <Navigation />
@@ -120,10 +78,10 @@ export default function MarketplacePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-[36px] md:text-[48px] font-bold leading-tight">
-            Explora el <span className="bg-ve-yellow px-2">Marketplace</span>
+            {t.marketplace.title} <span className="bg-ve-yellow px-2">{t.marketplace.titleHighlight}</span>
           </h1>
           <p className="text-[#393939] text-[16px] font-medium mt-2 max-w-lg">
-            Encuentra freelancers talentosos y contrata servicios pagando con USDC en Solana.
+            {t.marketplace.subtitle}
           </p>
         </div>
 
@@ -135,7 +93,7 @@ export default function MarketplacePage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={aiSearch ? "Describe lo que necesitas..." : "Buscar servicios..."}
+              placeholder={aiSearch ? t.marketplace.searchPlaceholderAi : t.marketplace.searchPlaceholder}
               className={`w-full border-4 rounded-xl pl-12 pr-20 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow ${
                 aiSearch ? "border-[#9945FF] bg-purple-50/30" : "border-black"
               }`}
@@ -147,11 +105,11 @@ export default function MarketplacePage() {
                 </button>
               )}
               <button
-                onClick={() => { setAiSearch(!aiSearch); if (!aiSearch) toast("Búsqueda inteligente activada", { icon: "✨" }); }}
+                onClick={() => { setAiSearch(!aiSearch); if (!aiSearch) toast("Smart search ON", { icon: "✨" }); }}
                 className={`p-1.5 rounded-lg transition-all ${
                   aiSearch ? "bg-[#9945FF] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" : "text-[#393939] hover:text-[#9945FF]"
                 }`}
-                title={aiSearch ? "Desactivar búsqueda IA" : "Activar búsqueda inteligente"}
+                title="AI Search"
               >
                 <Sparkles className="w-4 h-4" />
               </button>
@@ -164,7 +122,7 @@ export default function MarketplacePage() {
             }`}
           >
             <SlidersHorizontal className="w-5 h-5" />
-            Filtros
+            {t.marketplace.filters}
           </button>
         </div>
 
@@ -179,7 +137,7 @@ export default function MarketplacePage() {
                   : "bg-white text-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
               }`}
             >
-              Todos
+              {t.marketplace.all}
             </button>
             {CATEGORIES.map((cat) => (
               <button
@@ -200,11 +158,9 @@ export default function MarketplacePage() {
         {/* Results count */}
         {!loading && (
           <p className="text-sm font-bold text-[#393939] mb-4">
-            {services.length} servicio{services.length !== 1 ? "s" : ""} encontrado{services.length !== 1 ? "s" : ""}
-            {aiSearch && search.trim() && <span className="ml-2 text-[#9945FF]">✨ Ordenado por IA</span>}
-            {aiSearching && <span className="ml-2 text-[#9945FF] animate-pulse">⏳ Analizando...</span>}
-            {translating && <span className="ml-2 text-[#9945FF] animate-pulse">🌐 Traduciendo...</span>}
-            {!translating && Object.keys(translatedServices).length > 0 && <span className="ml-2 text-[#9945FF]">🌐 AI Translated</span>}
+            {services.length} {services.length !== 1 ? t.marketplace.servicesFound : t.marketplace.serviceFound}
+            {aiSearch && search.trim() && <span className="ml-2 text-[#9945FF]">✨ {t.marketplace.aiSorted}</span>}
+            {aiSearching && <span className="ml-2 text-[#9945FF] animate-pulse">⏳ {t.marketplace.aiAnalyzing}</span>}
           </p>
         )}
 
@@ -216,11 +172,11 @@ export default function MarketplacePage() {
         ) : services.length === 0 ? (
           <div className="bg-[#F5F5F5] border-4 border-black/10 rounded-xl p-12 text-center">
             <Briefcase className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-xl font-bold mb-2">No hay servicios disponibles</p>
+            <p className="text-xl font-bold mb-2">{t.marketplace.noServices}</p>
             <p className="text-[#393939] font-medium">
               {search || categoria !== "all"
-                ? "Intenta con otros filtros o términos de búsqueda."
-                : "Sé el primero en publicar un servicio."}
+                ? t.marketplace.noServicesHint
+                : t.marketplace.noServicesEmpty}
             </p>
           </div>
         ) : (
@@ -237,13 +193,13 @@ export default function MarketplacePage() {
 
                   {/* Title */}
                   <h3 className="mb-1 text-lg font-bold group-hover:underline">
-                    {translatedServices[service.id]?.titulo || service.titulo}
+                    {service.titulo}
                   </h3>
 
                   {/* Description */}
                   {service.descripcion && (
                     <p className="mb-3 line-clamp-2 text-sm text-[#393939] font-medium flex-1">
-                      {translatedServices[service.id]?.descripcion || service.descripcion}
+                      {service.descripcion}
                     </p>
                   )}
 
@@ -266,7 +222,7 @@ export default function MarketplacePage() {
                     </span>
                     <span className="text-xs font-bold text-[#393939] flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {service.delivery_days} días
+                      {service.delivery_days} {t.marketplace.days}
                     </span>
                   </div>
                 </div>

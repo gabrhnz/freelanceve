@@ -180,6 +180,24 @@ export const translations = {
       hasAccount: 'Already have an account?',
       logIn: 'Log in',
     },
+    // Marketplace
+    marketplace: {
+      title: 'Explore the',
+      titleHighlight: 'Marketplace',
+      subtitle: 'Find talented freelancers and hire services paying with USDC on Solana.',
+      searchPlaceholder: 'Search services...',
+      searchPlaceholderAi: 'Describe what you need...',
+      filters: 'Filters',
+      all: 'All',
+      servicesFound: 'services found',
+      serviceFound: 'service found',
+      aiSorted: 'AI Sorted',
+      aiAnalyzing: 'Analyzing...',
+      noServices: 'No services available',
+      noServicesHint: 'Try different filters or search terms.',
+      noServicesEmpty: 'Be the first to publish a service.',
+      days: 'days',
+    },
     // Dashboard
     dashboard: {
       title: 'Dashboard',
@@ -378,6 +396,24 @@ export const translations = {
       loading: 'Creando cuenta...',
       hasAccount: 'Ya tienes una cuenta?',
       logIn: 'Iniciar sesion',
+    },
+    // Marketplace
+    marketplace: {
+      title: 'Explora el',
+      titleHighlight: 'Marketplace',
+      subtitle: 'Encuentra freelancers talentosos y contrata servicios pagando con USDC en Solana.',
+      searchPlaceholder: 'Buscar servicios...',
+      searchPlaceholderAi: 'Describe lo que necesitas...',
+      filters: 'Filtros',
+      all: 'Todos',
+      servicesFound: 'servicios encontrados',
+      serviceFound: 'servicio encontrado',
+      aiSorted: 'Ordenado por IA',
+      aiAnalyzing: 'Analizando...',
+      noServices: 'No hay servicios disponibles',
+      noServicesHint: 'Intenta con otros filtros o términos de búsqueda.',
+      noServicesEmpty: 'Sé el primero en publicar un servicio.',
+      days: 'días',
     },
     // Dashboard
     dashboard: {

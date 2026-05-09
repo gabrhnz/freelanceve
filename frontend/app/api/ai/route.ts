@@ -59,31 +59,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ titulo, descripcion });
     }
 
-    // ── TRANSLATE: Translate text content ──
-    if (action === "translate") {
-      const { texts, targetLang } = params;
-      // texts is an object like { key1: "text1", key2: "text2" }
-      const entries = Object.entries(texts as Record<string, string>);
-      if (entries.length === 0) {
-        return NextResponse.json({ translations: {} });
-      }
-
-      const langName = targetLang === "en" ? "English" : "Spanish";
-      const textList = entries.map(([k, v]) => `${k}: ${v}`).join("\n");
-
-      const result = await callLLM(
-        `You are a translator. Translate the following key-value pairs to ${langName}. Output ONLY valid JSON with the same keys. Keep it natural and professional. Do NOT add markdown, code blocks, or explanations. Keep proper nouns, brand names (Wira, Solana, USDC), and technical terms unchanged.`,
-        `Translate to ${langName}:\n${textList}\n\nReturn JSON with same keys.`
-      );
-
-      const jsonMatch = result.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return NextResponse.json({ translations: parsed });
-      }
-      return NextResponse.json({ translations: texts });
-    }
-
     // ── SEARCH: Smart semantic search interpretation ──
     if (action === "search") {
       const { query, services } = params;
