@@ -120,7 +120,7 @@ export function Navigation() {
           <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center">
             <div className="w-6 h-6 bg-white rounded-full"></div>
           </div>
-          <span className="text-[20px] font-bold hidden sm:inline">Wira</span>
+          <span className="text-[20px] font-bold">Wira</span>
         </Link>
 
         {isLoggedIn ? (
