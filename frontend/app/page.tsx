@@ -7,7 +7,6 @@ import { ServicesSection } from "@/components/services-section";
 import { AboutSection } from "@/components/about-section";
 import { ExperienceSection } from "@/components/experience-section";
 import { TestimonialsSection } from "@/components/testimonials-section";
-import { Footer } from "@/components/footer";
 import { ScrollReveal } from "@/components/scroll-reveal";
 
 export default function Home() {
@@ -31,9 +30,6 @@ export default function Home() {
       </ScrollReveal>
       <ScrollReveal direction="scale">
         <TestimonialsSection />
-      </ScrollReveal>
-      <ScrollReveal>
-        <Footer />
       </ScrollReveal>
     </main>
   );

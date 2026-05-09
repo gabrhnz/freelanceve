@@ -56,6 +56,18 @@ export function Footer() {
                   Solana <ExternalLink className="w-3 h-3" />
                 </a>
               </li>
+              <li>
+                <a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer"
+                  className="text-[#393939] text-sm font-medium hover:text-black hover:underline transition-colors inline-flex items-center gap-1">
+                  Faucet SOL <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a href="https://faucet.circle.com/" target="_blank" rel="noopener noreferrer"
+                  className="text-[#393939] text-sm font-medium hover:text-black hover:underline transition-colors inline-flex items-center gap-1">
+                  Faucet USDC <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
             </ul>
           </div>
 

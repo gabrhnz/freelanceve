@@ -5,6 +5,7 @@ import WalletProvider from "@/components/WalletProvider";
 import { LanguageProvider } from "@/contexts/language-context";
 import { SessionProvider } from "@/contexts/session-context";
 import { Toaster } from "react-hot-toast";
+import { Footer } from "@/components/footer";
 
 const onest = Onest({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({
           <WalletProvider>
             <SessionProvider>
               {children}
+              <Footer />
               <Toaster
                 position="bottom-right"
                 toastOptions={{
