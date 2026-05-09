@@ -18,7 +18,7 @@ import {
   Service,
   Profile,
 } from "@/lib/supabase";
-import { getConnection, placeOrderOnChain, findOnChainService, publishServiceOnChain } from "@/lib/program";
+import { getConnection, placeOrderOnChain, findOnChainService, publishServiceOnChain, checkServiceExistsOnChain } from "@/lib/program";
 import { PublicKey } from "@solana/web3.js";
 import {
   ArrowLeft,
@@ -153,37 +153,14 @@ export default function ServiceDetailPage() {
     }
     try {
       setCheckingOnChain(true);
-      const connection = getConnection();
-      // Create a minimal read-only provider
-      const freelancerPubkey = new PublicKey(freelancerWallet);
-      // We just need to check if the account exists, use connection directly
-      const { getProfilePDA } = await import("@/lib/program");
-      const [profilePDA] = getProfilePDA(freelancerPubkey);
-      const info = await connection.getAccountInfo(profilePDA);
-      if (!info) {
-        setOnChainReady(false);
-        return;
-      }
-      // Profile exists, now check if any service exists
-      // We need a provider to fetch account data
-      if (anchorWallet) {
-        const provider = new AnchorProvider(connection, anchorWallet, { commitment: "confirmed" });
-        try {
-          await findOnChainService(provider, freelancerPubkey);
-          setOnChainReady(true);
-        } catch {
-          setOnChainReady(false);
-        }
-      } else {
-        // Can't fully verify without wallet, assume profile existence is enough indicator
-        setOnChainReady(true);
-      }
+      const exists = await checkServiceExistsOnChain(freelancerWallet);
+      setOnChainReady(exists);
     } catch {
       setOnChainReady(false);
     } finally {
       setCheckingOnChain(false);
     }
-  }, [anchorWallet]);
+  }, []);
 
   useEffect(() => {
     fetchService();

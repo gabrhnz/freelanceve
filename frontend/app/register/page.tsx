@@ -75,6 +75,8 @@ export default function RegisterPage() {
           router.push("/dashboard");
           return;
         }
+        // Wallet connected but no profile — go straight to role selection
+        if (step === 1) setStep(2);
       }
     }
     checkExisting();
@@ -371,12 +373,9 @@ export default function RegisterPage() {
                 />
               </div>
               {publicKey && (
-                <button
-                  onClick={() => setStep(2)}
-                  className="mt-4 text-sm font-bold text-[#9945FF] hover:underline"
-                >
-                  Wallet conectada — continuar →
-                </button>
+                <p className="mt-3 text-sm font-bold text-[#9945FF] animate-pulse">
+                  Wallet detectada, redirigiendo...
+                </p>
               )}
             </div>
           </div>

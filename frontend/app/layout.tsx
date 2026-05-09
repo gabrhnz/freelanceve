@@ -27,8 +27,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${onest.variable} font-sans antialiased overflow-x-hidden`}>
         <LanguageProvider>
-          <SessionProvider>
-            <WalletProvider>
+          <WalletProvider>
+            <SessionProvider>
               {children}
               <Toaster
                 position="bottom-right"
@@ -36,8 +36,8 @@ export default function RootLayout({
                   className: "!bg-black !text-white !border-2 !border-white",
                 }}
               />
-            </WalletProvider>
-          </SessionProvider>
+            </SessionProvider>
+          </WalletProvider>
         </LanguageProvider>
       </body>
     </html>

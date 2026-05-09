@@ -60,6 +60,34 @@ async function accountExists(connection: Connection, pubkey: PublicKey): Promise
   return info !== null;
 }
 
+// ─── Read-only check: does this freelancer have a service on-chain? ───
+// Works without AnchorProvider — uses raw account reads
+
+export async function checkServiceExistsOnChain(
+  freelancerWallet: string,
+): Promise<boolean> {
+  try {
+    const connection = getConnection();
+    const freelancerPubkey = new PublicKey(freelancerWallet);
+    const [profilePDA] = getProfilePDA(freelancerPubkey);
+
+    const profileInfo = await connection.getAccountInfo(profilePDA);
+    if (!profileInfo) return false;
+
+    // Parse service_count from profile data (offset: 8 discriminator + 32 owner + 4+50 nombre + 4+200 bio + 4+50 categoria)
+    // This is fragile with Borsh, so instead check if service PDAs exist directly
+    // Try up to 5 service indexes
+    for (let i = 0; i < 5; i++) {
+      const [servicePDA] = getServicePDA(freelancerPubkey, i);
+      const serviceInfo = await connection.getAccountInfo(servicePDA);
+      if (serviceInfo) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Register freelancer profile on-chain ───
 
 export async function registerFreelancerOnChain(

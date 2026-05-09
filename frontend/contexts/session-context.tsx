@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
-import { getProfileByEmail, Profile } from "@/lib/supabase";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { getProfileByEmail, getProfileByWallet, updateProfileById, Profile } from "@/lib/supabase";
 
 interface SessionUser {
   email: string;
@@ -34,9 +35,12 @@ const SessionContext = createContext<SessionContextType>({
 });
 
 export function SessionProvider({ children }: { children: ReactNode }) {
+  const { publicKey, connected } = useWallet();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const prevWalletRef = useRef<string | null>(null);
+  const emailSessionRef = useRef<{ email: string; profileId: string } | null>(null);
 
   const fetchSession = useCallback(async () => {
     try {
@@ -44,10 +48,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       if (data.user) {
         setUser(data.user);
-        // Load Supabase profile
+        // Load Supabase profile by email
         const p = await getProfileByEmail(data.user.email);
         setProfile(p);
         if (p) {
+          emailSessionRef.current = { email: data.user.email, profileId: p.id };
           setUser((prev) => prev ? {
             ...prev,
             nombre: p.nombre,
@@ -55,8 +60,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             walletAddress: p.wallet_address || undefined,
             profileId: p.id,
           } : prev);
+        } else {
+          emailSessionRef.current = { email: data.user.email, profileId: "" };
         }
       } else {
+        emailSessionRef.current = null;
         setUser(null);
         setProfile(null);
       }
@@ -71,6 +79,51 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchSession();
   }, [fetchSession]);
+
+  // Watch wallet changes: load profile for the connected wallet
+  // This handles: wallet-only users, wallet switches, and linking wallet to email profile
+  useEffect(() => {
+    const currentWallet = publicKey?.toBase58() || null;
+
+    // Skip if wallet hasn't changed
+    if (currentWallet === prevWalletRef.current) return;
+    prevWalletRef.current = currentWallet;
+
+    if (!currentWallet) {
+      // Wallet disconnected — if no email session, clear profile
+      if (!emailSessionRef.current?.email) {
+        setProfile(null);
+        setUser(null);
+      }
+      return;
+    }
+
+    // Wallet connected or changed — look up this wallet's profile
+    (async () => {
+      const walletProfile = await getProfileByWallet(currentWallet);
+      if (walletProfile) {
+        // This wallet has an existing profile — switch to it
+        setProfile(walletProfile);
+        setUser({
+          email: walletProfile.email || "",
+          nombre: walletProfile.nombre,
+          role: walletProfile.role,
+          walletAddress: currentWallet,
+          profileId: walletProfile.id,
+        });
+      } else if (emailSessionRef.current?.email && emailSessionRef.current.profileId) {
+        // Email session active, wallet not linked yet — auto-link wallet to this profile
+        await updateProfileById(emailSessionRef.current.profileId, { wallet_address: currentWallet });
+        setUser((prev) => prev ? { ...prev, walletAddress: currentWallet } : prev);
+        setProfile((prev) => prev ? { ...prev, wallet_address: currentWallet } : prev);
+      } else {
+        // No profile for this wallet and no email session — user is unregistered
+        setProfile(null);
+        setUser(null);
+      }
+      setLoading(false);
+    })();
+  }, [publicKey, connected]);
 
   const sendOTP = async (email: string) => {
     try {
