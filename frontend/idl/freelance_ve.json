@@ -48,7 +48,7 @@
       "name": "toggleService",
       "accounts": [
         { "name": "service", "isMut": true, "isSigner": false },
-        { "name": "owner", "isMut": false, "isSigner": true }
+        { "name": "freelancer", "isMut": false, "isSigner": true }
       ],
       "args": [
         { "name": "activo", "type": "bool" }
@@ -98,7 +98,7 @@
         { "name": "escrowUsdc", "isMut": true, "isSigner": false },
         { "name": "escrowAuthority", "isMut": false, "isSigner": false },
         { "name": "clientUsdc", "isMut": true, "isSigner": false },
-        { "name": "signer", "isMut": false, "isSigner": true },
+        { "name": "client", "isMut": false, "isSigner": true },
         { "name": "tokenProgram", "isMut": false, "isSigner": false }
       ],
       "args": []
@@ -180,9 +180,15 @@
     { "code": 6002, "name": "DeadlineNotReached", "msg": "The deadline has not been reached yet" },
     { "code": 6003, "name": "DeadlinePassed", "msg": "The deadline has already passed" },
     { "code": 6004, "name": "PriceTooLow", "msg": "Price must be at least 1 USDC (1_000_000 micro-USDC)" },
-    { "code": 6005, "name": "InvalidDeliveryDays", "msg": "Delivery days must be between 1 and 30" },
-    { "code": 6006, "name": "NameTooLong", "msg": "Name must be 50 characters or less" },
-    { "code": 6007, "name": "BioTooLong", "msg": "Bio must be 200 characters or less" }
+    { "code": 6005, "name": "PriceTooHigh", "msg": "Price exceeds maximum (1_000_000 USDC)" },
+    { "code": 6006, "name": "InvalidDeliveryDays", "msg": "Delivery days must be between 1 and 30" },
+    { "code": 6007, "name": "NameTooLong", "msg": "Name must be 50 characters or less" },
+    { "code": 6008, "name": "BioTooLong", "msg": "Bio must be 200 characters or less" },
+    { "code": 6009, "name": "InputTooLong", "msg": "Input exceeds maximum length" },
+    { "code": 6010, "name": "TooManySkills", "msg": "Maximum 5 skills allowed" },
+    { "code": 6011, "name": "SelfDeal", "msg": "Cannot order your own service" },
+    { "code": 6012, "name": "Overflow", "msg": "Arithmetic overflow" },
+    { "code": 6013, "name": "MintMismatch", "msg": "Token mint mismatch" }
   ],
   "metadata": {
     "address": "6zjwrFhvtcub6FYvb3kZCGTXLT3pzH2fQmyjFhM5WQSb"

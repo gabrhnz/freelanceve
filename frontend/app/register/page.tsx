@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { CATEGORIES } from "@/lib/constants";
+import { CATEGORIES, SKILL_SUGGESTIONS } from "@/lib/constants";
 import { Navigation } from "@/components/navigation";
 import { useSession } from "@/contexts/session-context";
 import { Briefcase, User, Users, ArrowRight, ArrowLeft, X, Plus, Mail, Wallet, Check } from "lucide-react";
@@ -497,15 +497,34 @@ export default function RegisterPage() {
               <div>
                 <label className="block text-sm font-bold mb-2">Skills (máx. 5)</label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={skillInput}
-                    onChange={(e) => addSkills(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
-                    maxLength={30}
-                    placeholder="Ej: React, Solidity, Diseño UI..."
-                    className="flex-1 border-3 border-black rounded-lg px-4 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-shadow"
-                  />
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={skillInput}
+                      onChange={(e) => addSkills(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                      maxLength={30}
+                      placeholder="Ej: Rust, Anchor, React..."
+                      className="w-full border-3 border-black rounded-lg px-4 py-3 text-[16px] font-medium placeholder:text-gray-400 focus:outline-none focus:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-shadow"
+                    />
+                    {skillInput.trim() && skills.length < 5 && (
+                      <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-white border-3 border-black rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] max-h-40 overflow-y-auto">
+                        {SKILL_SUGGESTIONS
+                          .filter(s => s.toLowerCase().includes(skillInput.toLowerCase()) && !skills.includes(s))
+                          .slice(0, 6)
+                          .map(s => (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => { setSkills([...skills, s]); setSkillInput(""); }}
+                              className="w-full text-left px-4 py-2 text-sm font-medium hover:bg-ve-yellow/30 transition-colors"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="button"
                     onClick={addSkill}
@@ -515,6 +534,20 @@ export default function RegisterPage() {
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
+                {skills.length === 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {["Rust", "Anchor", "React", "Solana Programs", "TypeScript", "DeFi", "NFT Collections", "UI/UX Design"].map(s => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => skills.length < 5 && setSkills([...skills, s])}
+                        className="text-xs font-bold text-[#393939] bg-[#F5F5F5] border-2 border-black/10 rounded-lg px-2.5 py-1 hover:bg-ve-yellow/20 hover:border-black/30 transition-all"
+                      >
+                        + {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-2 flex flex-wrap gap-2 min-h-[32px]">
                   {skills.map((s) => (
                     <span

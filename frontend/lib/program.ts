@@ -287,7 +287,7 @@ export async function refundOrderOnChain(
       escrowUsdc: getEscrowTokenPDA(orderPubkey)[0],
       escrowAuthority: escrowAuthority,
       clientUsdc: clientUsdc,
-      signer: provider.wallet.publicKey,
+      client: provider.wallet.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
     })
     .rpc();

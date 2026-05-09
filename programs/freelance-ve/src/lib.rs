@@ -16,6 +16,11 @@ pub mod freelance_ve {
     ) -> Result<()> {
         require!(nombre.len() <= 50, FreelanceError::NameTooLong);
         require!(bio.len() <= 200, FreelanceError::BioTooLong);
+        require!(categoria.len() <= 50, FreelanceError::InputTooLong);
+        require!(skills.len() <= 5, FreelanceError::TooManySkills);
+        for skill in &skills {
+            require!(skill.len() <= 30, FreelanceError::InputTooLong);
+        }
 
         let profile = &mut ctx.accounts.profile;
         profile.owner = ctx.accounts.owner.key();
@@ -63,7 +68,13 @@ pub mod freelance_ve {
         delivery_days: u8,
         categoria: String,
     ) -> Result<()> {
+        require!(titulo.len() <= 100, FreelanceError::InputTooLong);
+        require!(descripcion.len() <= 500, FreelanceError::InputTooLong);
+        require!(categoria.len() <= 50, FreelanceError::InputTooLong);
         require!(precio_usdc >= 1_000_000, FreelanceError::PriceTooLow); // min 1 USDC
+        require!(
+            precio_usdc <= 1_000_000_000_000, FreelanceError::PriceTooHigh // max 1M USDC
+        );
         require!(
             delivery_days >= 1 && delivery_days <= 30,
             FreelanceError::InvalidDeliveryDays
@@ -87,17 +98,16 @@ pub mod freelance_ve {
         service.created_at = Clock::get()?.unix_timestamp;
         service.bump = ctx.bumps.service;
 
-        profile.service_count = profile.service_count.checked_add(1).unwrap();
+        profile.service_count = profile.service_count
+            .checked_add(1)
+            .ok_or(FreelanceError::Overflow)?;
 
         Ok(())
     }
 
     pub fn toggle_service(ctx: Context<ToggleService>, activo: bool) -> Result<()> {
+        // ownership verified via PDA seeds in account constraint
         let service = &mut ctx.accounts.service;
-        require!(
-            service.freelancer == ctx.accounts.owner.key(),
-            FreelanceError::Unauthorized
-        );
         service.activo = activo;
         Ok(())
     }
@@ -105,6 +115,11 @@ pub mod freelance_ve {
     pub fn place_order(ctx: Context<PlaceOrder>) -> Result<()> {
         let service = &ctx.accounts.service;
         require!(service.activo, FreelanceError::InvalidStatus);
+        // Prevent self-dealing: client cannot order their own service
+        require!(
+            ctx.accounts.client.key() != service.freelancer,
+            FreelanceError::SelfDeal
+        );
 
         let now = Clock::get()?.unix_timestamp;
         let deadline = now + (service.delivery_days as i64) * 86400;
@@ -132,7 +147,9 @@ pub mod freelance_ve {
 
         // Increment service orders count
         let service_account = &mut ctx.accounts.service;
-        service_account.orders_count = service_account.orders_count.checked_add(1).unwrap();
+        service_account.orders_count = service_account.orders_count
+            .checked_add(1)
+            .ok_or(FreelanceError::Overflow)?;
 
         Ok(())
     }
@@ -186,8 +203,12 @@ pub mod freelance_ve {
         order.status = OrderStatus::Completed;
 
         let profile = &mut ctx.accounts.freelancer_profile;
-        profile.jobs_completed = profile.jobs_completed.checked_add(1).unwrap();
-        profile.total_earned = profile.total_earned.checked_add(order_amount).unwrap();
+        profile.jobs_completed = profile.jobs_completed
+            .checked_add(1)
+            .ok_or(FreelanceError::Overflow)?;
+        profile.total_earned = profile.total_earned
+            .checked_add(order_amount)
+            .ok_or(FreelanceError::Overflow)?;
 
         Ok(())
     }
@@ -200,6 +221,11 @@ pub mod freelance_ve {
         let order = &mut ctx.accounts.order;
         let now = Clock::get()?.unix_timestamp;
 
+        // Only client can initiate refund
+        require!(
+            order.client == ctx.accounts.client.key(),
+            FreelanceError::Unauthorized
+        );
         require!(now > order.deadline, FreelanceError::DeadlineNotReached);
         require!(
             order.status == OrderStatus::InProgress || order.status == OrderStatus::Delivered,
@@ -280,9 +306,12 @@ pub struct CreateService<'info> {
 
 #[derive(Accounts)]
 pub struct ToggleService<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        has_one = freelancer @ FreelanceError::Unauthorized,
+    )]
     pub service: Account<'info, ServiceListing>,
-    pub owner: Signer<'info>,
+    pub freelancer: Signer<'info>,
 }
 
 #[derive(Accounts)]
@@ -328,35 +357,42 @@ pub struct PlaceOrder<'info> {
 
 #[derive(Accounts)]
 pub struct DeliverOrder<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        has_one = freelancer @ FreelanceError::Unauthorized,
+    )]
     pub order: Account<'info, Order>,
     pub freelancer: Signer<'info>,
 }
 
 #[derive(Accounts)]
 pub struct ApproveOrder<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        has_one = client @ FreelanceError::Unauthorized,
+    )]
     pub order: Account<'info, Order>,
     #[account(
         mut,
-        constraint = escrow_usdc.mint == freelancer_usdc.mint
+        constraint = escrow_usdc.mint == freelancer_usdc.mint @ FreelanceError::MintMismatch,
+        constraint = escrow_usdc.owner == escrow_authority.key() @ FreelanceError::Unauthorized,
     )]
     pub escrow_usdc: Account<'info, TokenAccount>,
-    /// CHECK: PDA authority for escrow
+    /// CHECK: PDA authority for escrow, seeds verified below
     #[account(
         seeds = [b"escrow", order.key().as_ref()],
-        bump
+        bump = order.escrow_bump,
     )]
     pub escrow_authority: UncheckedAccount<'info>,
     #[account(
         mut,
-        constraint = freelancer_usdc.owner == order.freelancer
+        constraint = freelancer_usdc.owner == order.freelancer @ FreelanceError::Unauthorized,
     )]
     pub freelancer_usdc: Account<'info, TokenAccount>,
     #[account(
         mut,
         seeds = [b"profile", order.freelancer.as_ref()],
-        bump = freelancer_profile.bump
+        bump = freelancer_profile.bump,
     )]
     pub freelancer_profile: Account<'info, FreelancerProfile>,
     pub client: Signer<'info>,
@@ -365,25 +401,29 @@ pub struct ApproveOrder<'info> {
 
 #[derive(Accounts)]
 pub struct RefundOrder<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        has_one = client @ FreelanceError::Unauthorized,
+    )]
     pub order: Account<'info, Order>,
     #[account(
         mut,
-        constraint = escrow_usdc.mint == client_usdc.mint
+        constraint = escrow_usdc.mint == client_usdc.mint @ FreelanceError::MintMismatch,
+        constraint = escrow_usdc.owner == escrow_authority.key() @ FreelanceError::Unauthorized,
     )]
     pub escrow_usdc: Account<'info, TokenAccount>,
-    /// CHECK: PDA authority for escrow
+    /// CHECK: PDA authority for escrow, seeds verified below
     #[account(
         seeds = [b"escrow", order.key().as_ref()],
-        bump
+        bump = order.escrow_bump,
     )]
     pub escrow_authority: UncheckedAccount<'info>,
     #[account(
         mut,
-        constraint = client_usdc.owner == order.client
+        constraint = client_usdc.owner == order.client @ FreelanceError::Unauthorized,
     )]
     pub client_usdc: Account<'info, TokenAccount>,
-    pub signer: Signer<'info>,
+    pub client: Signer<'info>,
     pub token_program: Program<'info, Token>,
 }
 
@@ -465,10 +505,22 @@ pub enum FreelanceError {
     DeadlinePassed,
     #[msg("Price must be at least 1 USDC (1_000_000 micro-USDC)")]
     PriceTooLow,
+    #[msg("Price exceeds maximum (1_000_000 USDC)")]
+    PriceTooHigh,
     #[msg("Delivery days must be between 1 and 30")]
     InvalidDeliveryDays,
     #[msg("Name must be 50 characters or less")]
     NameTooLong,
     #[msg("Bio must be 200 characters or less")]
     BioTooLong,
+    #[msg("Input exceeds maximum length")]
+    InputTooLong,
+    #[msg("Maximum 5 skills allowed")]
+    TooManySkills,
+    #[msg("Cannot order your own service")]
+    SelfDeal,
+    #[msg("Arithmetic overflow")]
+    Overflow,
+    #[msg("Token mint mismatch")]
+    MintMismatch,
 }

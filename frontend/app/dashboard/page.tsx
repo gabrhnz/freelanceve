@@ -22,7 +22,7 @@ import {
 } from "@/lib/supabase";
 import {
   Plus, Wallet, Briefcase, TrendingUp, Package,
-  RefreshCw, Clock, CheckCircle, Eye, Pencil, Trash2, ShieldCheck, ArrowRightLeft,
+  RefreshCw, Clock, CheckCircle, Eye, Pencil, Trash2, ShieldCheck, ArrowRightLeft, Mail, History,
 } from "lucide-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
@@ -221,6 +221,12 @@ export default function DashboardPage() {
             >
               <Eye className="w-4 h-4" /> Marketplace
             </Link>
+            <Link
+              href="/dashboard/transactions"
+              className="inline-flex items-center justify-center gap-2 bg-white text-black border-4 border-black rounded-xl px-5 py-2.5 font-bold text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              <History className="w-4 h-4" /> Historial
+            </Link>
             {viewMode === "freelancer" && (profile?.role === "freelancer" || profile?.role === "both") && (
               <Link
                 href="/services/new"
@@ -231,6 +237,25 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* Email-missing banner for wallet-only users */}
+        {profile && !profile.email && (
+          <div className="bg-ve-yellow border-4 border-black rounded-xl p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Mail className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-sm">Añade tu email para completar tu perfil</p>
+                <p className="text-xs text-[#393939]">Recibirás notificaciones de pedidos y mensajes. Tu cuenta funciona sin email, pero te lo recomendamos.</p>
+              </div>
+            </div>
+            <Link
+              href="/profile/edit"
+              className="bg-black text-white border-3 border-black rounded-lg px-5 py-2 text-xs font-bold whitespace-nowrap shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              Añadir email
+            </Link>
+          </div>
+        )}
 
         {/* Wallet Connection Banner */}
         {!publicKey && (
