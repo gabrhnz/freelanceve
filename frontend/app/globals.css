@@ -34,9 +34,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.dark body,
-.dark html {
-  background: #111111;
+html.dark,
+html.dark body,
+.dark body {
+  background: #111111 !important;
   color: #f0f0f0;
 }
 

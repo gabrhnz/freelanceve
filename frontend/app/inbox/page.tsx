@@ -147,7 +147,7 @@ export default function InboxPage() {
   return (
     <>
       <Navigation />
-      <div className="container mx-auto px-4 py-8 max-w-3xl space-y-6">
+      <div className="container mx-auto px-4 py-8 max-w-3xl space-y-6 min-h-[80vh]">
         <div className="flex items-center justify-between">
           <h1 className="text-[32px] md:text-[42px] font-bold leading-tight">
             <span className="bg-ve-yellow px-2">Inbox</span>
