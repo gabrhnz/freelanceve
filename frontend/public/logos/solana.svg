@@ -1,0 +1,17 @@
+<svg width="200" height="40" viewBox="0 0 200 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Solana logomark - 3 stacked parallelograms -->
+  <g>
+    <path d="M7.5 28.5L12.5 33.5H35.5L30.5 28.5H7.5Z" fill="url(#grad1)"/>
+    <path d="M7.5 11.5L12.5 6.5H35.5L30.5 11.5H7.5Z" fill="url(#grad1)"/>
+    <path d="M7.5 20L12.5 25H35.5L30.5 20H7.5Z" fill="url(#grad1)"/>
+  </g>
+  <!-- Solana text -->
+  <text x="45" y="27" fill="white" font-family="system-ui, sans-serif" font-size="22" font-weight="700" letter-spacing="1">SOLANA</text>
+  <defs>
+    <linearGradient id="grad1" x1="7.5" y1="33.5" x2="35.5" y2="6.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9945FF"/>
+      <stop offset="0.5" stop-color="#14F195"/>
+      <stop offset="1" stop-color="#00C2FF"/>
+    </linearGradient>
+  </defs>
+</svg>

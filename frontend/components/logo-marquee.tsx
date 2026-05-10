@@ -1,5 +1,9 @@
 export function LogoMarquee() {
   const items = [
+    { logo: "/logos/solana.svg", alt: "Solana" },
+    { logo: "/logos/circle.svg", alt: "Circle" },
+    { logo: "/logos/usdc.svg", alt: "USDC" },
+    { logo: "/logos/dev3pack.svg", alt: "Dev3pack" },
     { logo: "/logos/application.svg", alt: "application" },
     { logo: "/logos/business.svg", alt: "business" },
     { logo: "/logos/company.svg", alt: "company" },
