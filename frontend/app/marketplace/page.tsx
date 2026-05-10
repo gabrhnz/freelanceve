@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/constants";
 import { getServices, Service } from "@/lib/supabase";
 import { Search, SlidersHorizontal, Briefcase, Clock, X, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
+import { useTranslate } from "@/hooks/useTranslate";
 import toast from "react-hot-toast";
 
 export default function MarketplacePage() {
@@ -17,7 +18,9 @@ export default function MarketplacePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [aiSearch, setAiSearch] = useState(false);
   const [aiSearching, setAiSearching] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { translateBatch, isTranslating } = useTranslate();
+  const [translatedServices, setTranslatedServices] = useState<Map<string, { titulo: string; descripcion: string }>>(new Map());
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -63,6 +66,23 @@ export default function MarketplacePage() {
     setServices(data);
     setLoading(false);
   }, [categoria, search, aiSearch]);
+
+  // Auto-translate services when language changes
+  useEffect(() => {
+    if (services.length === 0) return;
+    const texts = services.flatMap((s) => [s.titulo || "", s.descripcion || ""]);
+    translateBatch(texts).then((translated) => {
+      const map = new Map<string, { titulo: string; descripcion: string }>();
+      services.forEach((s, i) => {
+        map.set(s.id, {
+          titulo: translated[i * 2] || s.titulo,
+          descripcion: translated[i * 2 + 1] || s.descripcion || "",
+        });
+      });
+      setTranslatedServices(map);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services, language]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -193,13 +213,13 @@ export default function MarketplacePage() {
 
                   {/* Title */}
                   <h3 className="mb-1 text-lg font-bold group-hover:underline">
-                    {service.titulo}
+                    {translatedServices.get(service.id)?.titulo || service.titulo}
                   </h3>
 
                   {/* Description */}
                   {service.descripcion && (
                     <p className="mb-3 line-clamp-2 text-sm text-[#393939] font-medium flex-1">
-                      {service.descripcion}
+                      {translatedServices.get(service.id)?.descripcion || service.descripcion}
                     </p>
                   )}
 

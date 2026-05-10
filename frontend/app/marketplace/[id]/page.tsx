@@ -38,6 +38,8 @@ import {
   Play,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/contexts/language-context";
+import { useTranslate } from "@/hooks/useTranslate";
 
 // Fiverr-style carousel for images + YouTube
 function ServiceCarousel({ slides }: { slides: { type: "image" | "youtube"; url: string }[] }) {
@@ -122,12 +124,25 @@ export default function ServiceDetailPage() {
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
+  const { language } = useLanguage();
+  const { translateBatch } = useTranslate();
+  const [translated, setTranslated] = useState<{ titulo: string; descripcion: string } | null>(null);
 
   const fetchService = useCallback(async () => {
     const data = await getServiceById(serviceId);
     setService(data);
     setLoading(false);
   }, [serviceId]);
+
+  // Translate service content when language changes
+  useEffect(() => {
+    if (!service) return;
+    const texts = [service.titulo || "", service.descripcion || ""];
+    translateBatch(texts).then(([titulo, descripcion]) => {
+      setTranslated({ titulo: titulo || service.titulo, descripcion: descripcion || service.descripcion || "" });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [service, language]);
 
   const fetchMyProfile = useCallback(async () => {
     let p: Profile | null = null;
@@ -471,11 +486,11 @@ export default function ServiceDetailPage() {
               </div>
 
               <h1 className="text-[28px] md:text-[36px] font-bold leading-tight mb-4">
-                {service.titulo}
+                {translated?.titulo || service.titulo}
               </h1>
 
               <p className="text-[#393939] text-[16px] font-medium leading-relaxed whitespace-pre-wrap">
-                {service.descripcion}
+                {translated?.descripcion || service.descripcion}
               </p>
 
               {/* Fiverr-style Media Carousel */}
