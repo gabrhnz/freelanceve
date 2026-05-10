@@ -82,38 +82,75 @@ body {
   color: #888888 !important;
 }
 
-/* Black borders → subtle white */
+/* Black borders → visible white/purple to keep neobrutalism bold feel */
 .dark .border-black {
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .dark .border-black\/5,
-.dark .border-black\/10,
-.dark .border-black\/20 {
+.dark .border-black\/10 {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.dark .border-3.border-black,
+.dark .border-black\/20 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .border-2.border-black {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.dark .border-3.border-black {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
 .dark .border-4.border-black {
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Shadows → glow or remove */
-.dark .shadow-\[4px_4px_0px_0px_rgba\(0\,0\,0\,1\)\],
-.dark .shadow-\[6px_6px_0px_0px_rgba\(0\,0\,0\,1\)\],
-.dark .shadow-\[3px_3px_0px_0px_rgba\(0\,0\,0\,1\)\],
-.dark .shadow-\[2px_2px_0px_0px_rgba\(0\,0\,0\,1\)\],
+/* Neobrutalism offset shadows → purple-tinted solid offset (keep the chunky feel) */
+.dark .shadow-\[2px_2px_0px_0px_rgba\(0\,0\,0\,1\)\] {
+  box-shadow: 2px 2px 0px 0px rgba(153, 69, 255, 0.4) !important;
+}
+
+.dark .shadow-\[3px_3px_0px_0px_rgba\(0\,0\,0\,1\)\] {
+  box-shadow: 3px 3px 0px 0px rgba(153, 69, 255, 0.4) !important;
+}
+
+.dark .shadow-\[4px_4px_0px_0px_rgba\(0\,0\,0\,1\)\] {
+  box-shadow: 4px 4px 0px 0px rgba(153, 69, 255, 0.35) !important;
+}
+
+.dark .shadow-\[6px_6px_0px_0px_rgba\(0\,0\,0\,1\)\] {
+  box-shadow: 6px 6px 0px 0px rgba(153, 69, 255, 0.3) !important;
+}
+
 .dark .shadow-\[8px_8px_0px_0px_rgba\(0\,0\,0\,1\)\] {
-  box-shadow: 0 0 20px rgba(153, 69, 255, 0.08) !important;
+  box-shadow: 8px 8px 0px 0px rgba(153, 69, 255, 0.25) !important;
 }
 
-/* Inputs & textareas */
+/* Hover shadow escalation (neobrutalist hover pop) */
+.dark .hover\:shadow-\[3px_3px_0px_0px_rgba\(0\,0\,0\,1\)\]:hover {
+  box-shadow: 3px 3px 0px 0px rgba(153, 69, 255, 0.5) !important;
+}
+
+.dark .hover\:shadow-\[6px_6px_0px_0px_rgba\(0\,0\,0\,1\)\]:hover {
+  box-shadow: 6px 6px 0px 0px rgba(153, 69, 255, 0.45) !important;
+}
+
+/* Inputs & textareas — keep visible borders */
 .dark input,
 .dark textarea,
 .dark select {
-  background-color: #222222 !important;
+  background-color: #1e1e1e !important;
   color: #f0f0f0 !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  box-shadow: 3px 3px 0px 0px rgba(153, 69, 255, 0.4) !important;
 }
 
 .dark input::placeholder,
@@ -155,9 +192,10 @@ body {
   background-color: rgba(239, 68, 68, 0.1) !important;
 }
 
-/* Badge overrides */
+/* Badge overrides — keep bold & readable */
 .dark .bg-ve-yellow {
-  background-color: #b8960a !important;
+  background-color: #d4a90e !important;
+  color: #111111 !important;
 }
 
 /* Landing page specific */
@@ -165,9 +203,10 @@ body {
   background-color: #111111 !important;
 }
 
-/* Wallet adapter in dark mode */
+/* Wallet adapter in dark mode — keep border visible */
 .dark .wallet-adapter-button {
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 2px 2px 0px 0px rgba(153, 69, 255, 0.3) !important;
 }
 
 /* Black bg elements stay black */

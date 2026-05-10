@@ -113,7 +113,7 @@ export function Navigation() {
 
   return (
     <div className="container mx-auto px-4 pt-8 pb-4">
-      <nav className="flex items-center justify-between bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white/15 rounded-xl px-5 py-3 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-none transition-colors">
+      <nav className="flex items-center justify-between bg-white border-4 border-black rounded-xl px-5 py-3 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors">
         {/* Logo */}
         <Link
           href={isLoggedIn ? "/marketplace" : "/"}
@@ -279,7 +279,7 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-4 bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white/15 rounded-xl p-5 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-none transition-colors">
+        <div className="md:hidden mt-4 bg-white border-4 border-black rounded-xl p-5 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-colors">
           <div className="flex flex-col gap-4">
             {isLoggedIn ? (
               <>

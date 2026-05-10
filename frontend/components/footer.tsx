@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
-const linkClass = "text-[#666] dark:text-[#999] text-xs font-medium hover:text-black dark:hover:text-white transition-colors";
-const extClass = "text-[#666] dark:text-[#999] text-xs font-medium hover:text-black dark:hover:text-white transition-colors inline-flex items-center gap-1";
+const linkClass = "text-[#666] text-xs font-medium hover:text-black transition-colors";
+const extClass = "text-[#666] text-xs font-medium hover:text-black transition-colors inline-flex items-center gap-1";
 
 export function Footer() {
   return (
-    <footer className="bg-white dark:bg-[#1a1a1a] border-t-2 border-black/10 dark:border-white/10 mt-8 transition-colors">
+    <footer className="bg-white border-t-2 border-black/10 mt-8 transition-colors">
       <div className="container mx-auto px-4 py-5 max-w-5xl">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           {/* Left: brand + links */}
