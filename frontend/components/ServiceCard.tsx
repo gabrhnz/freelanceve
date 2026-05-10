@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PublicKey } from "@solana/web3.js";
 import { formatUSDC } from "@/lib/utils";
 import USDCBadge from "./USDCBadge";
+import { useLanguage } from "@/contexts/language-context";
 
 interface ServiceData {
   titulo: string;
@@ -22,6 +23,7 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({ service, publicKey }: ServiceCardProps) {
+  const { t } = useLanguage();
   const content = (
     <div className="group bg-white border-4 border-black rounded-xl p-5 transition-all hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
       <div className="mb-3 flex items-center justify-between">
@@ -31,7 +33,7 @@ export default function ServiceCard({ service, publicKey }: ServiceCardProps) {
         <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border-2 border-black ${
           service.activo ? "bg-ve-yellow" : "bg-gray-200 text-gray-500"
         }`}>
-          {service.activo ? "Activo" : "Pausado"}
+          {service.activo ? t.common.active : t.common.paused}
         </span>
       </div>
 
@@ -48,7 +50,7 @@ export default function ServiceCard({ service, publicKey }: ServiceCardProps) {
       <div className="flex items-center justify-between border-t-3 border-black/10 pt-3">
         <USDCBadge amount={service.precioUsdc.toNumber()} compact />
         <span className="text-xs font-bold text-[#393939]">
-          {service.deliveryDays} días
+          {service.deliveryDays} {t.common.days}
         </span>
       </div>
     </div>

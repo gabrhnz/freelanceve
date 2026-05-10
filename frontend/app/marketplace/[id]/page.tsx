@@ -124,7 +124,7 @@ export default function ServiceDetailPage() {
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { translateBatch } = useTranslate();
   const [translated, setTranslated] = useState<{ titulo: string; descripcion: string } | null>(null);
 
@@ -475,7 +475,7 @@ export default function ServiceDetailPage() {
                 </span>
                 {service.activo && (
                   <span className="bg-green-100 text-green-800 border-2 border-black rounded-lg px-3 py-1 text-xs font-bold">
-                    Disponible
+                    {t.common.available}
                   </span>
                 )}
                 {onChainReady === true && (
@@ -512,7 +512,7 @@ export default function ServiceDetailPage() {
             {/* Freelancer info */}
             {service.owner && (
               <div className="bg-white border-4 border-black rounded-xl p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <h3 className="font-bold text-lg mb-4">Sobre el Freelancer</h3>
+                <h3 className="font-bold text-lg mb-4">{t.serviceDetail.aboutFreelancer}</h3>
                 <div className="flex items-start gap-4">
                   <Link href={`/u/${service.owner.username || service.owner.id}`} className="shrink-0 hover:opacity-80 transition-opacity">
                     <div className="w-14 h-14 bg-[#9945FF] rounded-xl border-3 border-black flex items-center justify-center text-xl font-bold text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
@@ -560,15 +560,15 @@ export default function ServiceDetailPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-3 text-sm">
                   <Clock className="w-4 h-4 text-[#393939]" />
-                  <span className="font-medium">Entrega en <span className="font-bold">{service.delivery_days} días</span></span>
+                  <span className="font-medium">{t.common.deliveryIn} <span className="font-bold">{service.delivery_days} {t.common.days}</span></span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <ShieldCheck className="w-4 h-4 text-[#393939]" />
-                  <span className="font-medium">Pago con escrow en Solana</span>
+                  <span className="font-medium">{t.serviceDetail.escrowProtected}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <CheckCircle className="w-4 h-4 text-[#393939]" />
-                  <span className="font-medium">Reembolso garantizado</span>
+                  <span className="font-medium">{language === 'en' ? 'Guaranteed refund' : 'Reembolso garantizado'}</span>
                 </div>
               </div>
 
@@ -579,11 +579,11 @@ export default function ServiceDetailPage() {
                 <div className="mt-4 space-y-2">
                   <Link href={`/chat/${service.owner_id}`}
                     className="flex items-center justify-center gap-2 w-full bg-white text-black border-3 border-black rounded-xl py-3 font-bold text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all">
-                    <MessageSquare className="w-4 h-4" /> Contactar Freelancer
+                    <MessageSquare className="w-4 h-4" /> {t.serviceDetail.contactFreelancer}
                   </Link>
                   <button onClick={() => setShowReport(true)}
                     className="flex items-center justify-center gap-2 w-full text-[#393939] hover:text-red-600 text-xs font-bold py-2 transition-colors">
-                    <Flag className="w-3 h-3" /> Reportar anuncio
+                    <Flag className="w-3 h-3" /> {t.serviceDetail.report}
                   </button>
                 </div>
               )}
@@ -603,7 +603,7 @@ export default function ServiceDetailPage() {
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white border-4 border-black rounded-xl p-6 max-w-md w-full shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-lg flex items-center gap-2"><Flag className="w-5 h-5 text-red-500" /> Reportar Anuncio</h3>
+                <h3 className="font-bold text-lg flex items-center gap-2"><Flag className="w-5 h-5 text-red-500" /> {t.serviceDetail.reportService}</h3>
                 <button onClick={() => setShowReport(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F5F5F5]"><X className="w-5 h-5" /></button>
               </div>
               <p className="text-sm text-[#393939]">Si este anuncio viola los <Link href="/terms" className="underline font-bold">Términos y Condiciones</Link>, por favor selecciona un motivo:</p>
