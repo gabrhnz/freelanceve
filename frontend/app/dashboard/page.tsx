@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/contexts/language-context";
 
 export default function DashboardPage() {
   const { publicKey } = useWallet();
@@ -42,6 +43,19 @@ export default function DashboardPage() {
   const [usdcBalance, setUsdcBalance] = useState<number | null>(null);
   const [loadingBalances, setLoadingBalances] = useState(false);
   const [viewMode, setViewMode] = useState<"freelancer" | "client">("freelancer");
+  const { t } = useLanguage();
+
+  const statusLabel = (status: string) => {
+    const map: Record<string, string> = {
+      completed: t.common.statusCompleted,
+      accepted: t.common.statusAccepted,
+      in_progress: t.common.statusInProgress,
+      delivered: t.common.statusDelivered,
+      refunded: t.common.statusRefunded,
+      pending: t.common.statusPending,
+    };
+    return map[status] || status;
+  };
 
   const fetchProfile = useCallback(async () => {
     // Try email first, then wallet
@@ -114,26 +128,26 @@ export default function DashboardPage() {
       setServices((prev) =>
         prev.map((s) => (s.id === serviceId ? { ...s, activo: !currentActive } : s))
       );
-      toast.success(currentActive ? "Servicio pausado" : "Servicio activado");
+      toast.success(currentActive ? t.dashboard.servicePaused : t.dashboard.serviceActivated);
     } catch (err) {
       console.error(err);
-      toast.error("Error al cambiar estado");
+      toast.error(t.dashboard.toggleError);
     }
   };
 
   const handleDelete = async (serviceId: string, titulo: string) => {
-    if (!confirm(`¿Estás seguro de eliminar "${titulo}"? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(`${t.dashboard.deleteConfirm} "${titulo}"? ${t.dashboard.deleteConfirmSuffix}`)) return;
     try {
       const ok = await deleteDbService(serviceId);
       if (ok) {
         setServices((prev) => prev.filter((s) => s.id !== serviceId));
-        toast.success("Servicio eliminado");
+        toast.success(t.dashboard.serviceDeleted);
       } else {
-        toast.error("Error al eliminar servicio");
+        toast.error(t.dashboard.deleteError);
       }
     } catch (err) {
       console.error(err);
-      toast.error("Error al eliminar servicio");
+      toast.error(t.dashboard.deleteError);
     }
   };
 
@@ -160,13 +174,13 @@ export default function DashboardPage() {
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="bg-white border-4 border-black rounded-xl p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center max-w-md mx-4">
             <Wallet className="w-12 h-12 mx-auto mb-4" />
-            <p className="text-xl font-bold mb-2">Inicia sesión</p>
-            <p className="text-[#393939] mb-4">Necesitas registrarte para acceder a tu dashboard.</p>
+            <p className="text-xl font-bold mb-2">{t.dashboard.loginRequired}</p>
+            <p className="text-[#393939] mb-4">{t.dashboard.loginRequiredDesc}</p>
             <Link
               href="/register"
               className="inline-flex items-center gap-2 bg-black text-white border-4 border-black rounded-xl px-6 py-3 font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              Registrarse
+              {t.dashboard.register}
             </Link>
           </div>
         </div>
@@ -193,7 +207,7 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-[32px] md:text-[42px] font-bold leading-tight">
-              Hola, <span className="bg-ve-yellow px-2">{profile?.nombre || user?.nombre || "Anon"}</span>
+              {t.dashboard.hello}, <span className="bg-ve-yellow px-2">{profile?.nombre || user?.nombre || "Anon"}</span>
             </h1>
             <p className="text-[#393939] text-[16px] font-medium mt-1">
               {profile?.bio || `${profile?.role || "freelancer"} · ${profile?.email}`}
@@ -206,33 +220,33 @@ export default function DashboardPage() {
                 onClick={() => setViewMode("freelancer")}
                 className={`px-4 py-2.5 text-xs font-bold transition-all flex items-center gap-1.5 ${viewMode === "freelancer" ? "bg-[#9945FF] text-white" : "hover:bg-[#EBEBEB]"}`}
               >
-                <Briefcase className="w-3.5 h-3.5" /> Freelancer
+                <Briefcase className="w-3.5 h-3.5" /> {t.dashboard.freelancer}
               </button>
               <button
                 onClick={() => setViewMode("client")}
                 className={`px-4 py-2.5 text-xs font-bold transition-all flex items-center gap-1.5 ${viewMode === "client" ? "bg-[#2775CA] text-white" : "hover:bg-[#EBEBEB]"}`}
               >
-                <Eye className="w-3.5 h-3.5" /> Contratista
+                <Eye className="w-3.5 h-3.5" /> {t.dashboard.client}
               </button>
             </div>
             <Link
               href="/marketplace"
               className="inline-flex items-center justify-center gap-2 bg-white text-black border-4 border-black rounded-xl px-5 py-2.5 font-bold text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              <Eye className="w-4 h-4" /> Marketplace
+              <Eye className="w-4 h-4" /> {t.navLoggedIn.marketplace}
             </Link>
             <Link
               href="/dashboard/transactions"
               className="inline-flex items-center justify-center gap-2 bg-white text-black border-4 border-black rounded-xl px-5 py-2.5 font-bold text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              <History className="w-4 h-4" /> Historial
+              <History className="w-4 h-4" /> {t.dashboard.history}
             </Link>
             {viewMode === "freelancer" && (profile?.role === "freelancer" || profile?.role === "both") && (
               <Link
                 href="/services/new"
                 className="inline-flex items-center justify-center gap-2 bg-black text-white border-4 border-black rounded-xl px-5 py-2.5 font-bold text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
               >
-                <Plus className="w-4 h-4" /> Publicar Servicio
+                <Plus className="w-4 h-4" /> {t.dashboard.publishService}
               </Link>
             )}
           </div>
@@ -244,15 +258,15 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 flex-shrink-0" />
               <div>
-                <p className="font-bold text-sm">Añade tu email para completar tu perfil</p>
-                <p className="text-xs text-[#393939]">Recibirás notificaciones de pedidos y mensajes. Tu cuenta funciona sin email, pero te lo recomendamos.</p>
+                <p className="font-bold text-sm">{t.dashboard.addEmailTitle}</p>
+                <p className="text-xs text-[#393939]">{t.dashboard.addEmailDesc}</p>
               </div>
             </div>
             <Link
               href="/profile/edit"
               className="bg-black text-white border-3 border-black rounded-lg px-5 py-2 text-xs font-bold whitespace-nowrap shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              Añadir email
+              {t.dashboard.addEmail}
             </Link>
           </div>
         )}
@@ -261,8 +275,8 @@ export default function DashboardPage() {
         {!publicKey && (
           <div className="bg-gradient-to-r from-[#9945FF] to-[#14F195] border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-white">
-              <p className="font-bold text-lg">Conecta tu Wallet</p>
-              <p className="text-sm opacity-90">Para ver tus balances y realizar transacciones on-chain</p>
+              <p className="font-bold text-lg">{t.dashboard.connectWalletTitle}</p>
+              <p className="text-sm opacity-90">{t.dashboard.connectWalletDesc}</p>
             </div>
             <WalletMultiButton style={{
               backgroundColor: "white",
@@ -284,7 +298,7 @@ export default function DashboardPage() {
             <a href={`https://explorer.solana.com/address/${publicKey.toBase58()}?cluster=devnet`} target="_blank" rel="noopener noreferrer"
               className="bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-bold text-[#393939]">SOL Balance</p>
+                <p className="text-sm font-bold text-[#393939]">{t.dashboard.solBalance}</p>
                 <div className="w-8 h-8 bg-[#9945FF] rounded-lg flex items-center justify-center border-2 border-black">
                   <svg viewBox="0 0 128 128" className="w-5 h-5">
                     <circle cx="64" cy="64" r="60" fill="white"/>
@@ -295,7 +309,7 @@ export default function DashboardPage() {
               <p className="text-[28px] font-bold">
                 {loadingBalances ? "..." : solBalance !== null ? solBalance.toFixed(4) : "—"}
               </p>
-              <p className="text-xs text-[#9945FF] font-bold">Ver en Explorer →</p>
+              <p className="text-xs text-[#9945FF] font-bold">{t.dashboard.viewInExplorer}</p>
             </a>
           )}
 
@@ -304,7 +318,7 @@ export default function DashboardPage() {
             <a href={`https://explorer.solana.com/address/${publicKey.toBase58()}?cluster=devnet`} target="_blank" rel="noopener noreferrer"
               className="bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-bold text-[#393939]">USDC Balance</p>
+                <p className="text-sm font-bold text-[#393939]">{t.dashboard.stats.balance}</p>
                 <div className="w-8 h-8 bg-[#2775CA] rounded-lg flex items-center justify-center border-2 border-black">
                   <svg viewBox="0 0 128 128" className="w-5 h-5">
                     <circle cx="64" cy="64" r="60" fill="white"/>
@@ -315,14 +329,14 @@ export default function DashboardPage() {
               <p className="text-[28px] font-bold">
                 {loadingBalances ? "..." : usdcBalance !== null ? `$${usdcBalance.toFixed(2)}` : "—"}
               </p>
-              <p className="text-xs text-[#2775CA] font-bold">Ver transacciones →</p>
+              <p className="text-xs text-[#2775CA] font-bold">{t.dashboard.viewTransactions}</p>
             </a>
           )}
 
           {/* Escrow Balance */}
           <div className="bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold text-[#393939]">En Escrow</p>
+              <p className="text-sm font-bold text-[#393939]">{t.dashboard.inEscrow}</p>
               <div className="w-8 h-8 bg-[#14F195] rounded-lg flex items-center justify-center border-2 border-black">
                 <ShieldCheck className="w-4 h-4" />
               </div>
@@ -334,7 +348,7 @@ export default function DashboardPage() {
                 .toFixed(2)}
             </p>
             <p className="text-xs text-[#393939] font-medium">
-              USDC en {orders.filter((o) => ["pending", "accepted", "in_progress", "delivered"].includes(o.status)).length} órdenes activas
+              USDC {orders.filter((o) => ["pending", "accepted", "in_progress", "delivered"].includes(o.status)).length} {t.dashboard.activeOrders}
             </p>
           </div>
 
@@ -342,14 +356,14 @@ export default function DashboardPage() {
           <Link href="/orders"
             className="bg-white border-4 border-black rounded-xl p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold text-[#393939]">Órdenes</p>
+              <p className="text-sm font-bold text-[#393939]">{t.orders.title}</p>
               <div className="w-8 h-8 bg-ve-red rounded-lg flex items-center justify-center border-2 border-black">
                 <TrendingUp className="w-4 h-4 text-white" />
               </div>
             </div>
             <p className="text-[28px] font-bold">{orders.length}</p>
             <p className="text-xs text-[#393939] font-medium">
-              {completedOrders.length} completadas
+              {completedOrders.length} {t.common.statusCompleted.toLowerCase()}
             </p>
           </Link>
         </div>
@@ -363,7 +377,7 @@ export default function DashboardPage() {
               className="flex items-center gap-2 text-sm font-bold text-[#393939] hover:text-black transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${loadingBalances ? "animate-spin" : ""}`} />
-              Actualizar balances
+              {t.dashboard.refreshBalances}
             </button>
           </div>
         )}
@@ -372,10 +386,10 @@ export default function DashboardPage() {
         {viewMode === "freelancer" && (
           <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[24px] font-bold">Mis Servicios</h2>
+            <h2 className="text-[24px] font-bold">{t.dashboard.myServices}</h2>
             {(profile?.role === "freelancer" || profile?.role === "both") && (
               <Link href="/services/new" className="text-sm font-bold text-[#393939] hover:text-black">
-                + Nuevo servicio
+                {t.dashboard.newService}
               </Link>
             )}
           </div>
@@ -386,13 +400,13 @@ export default function DashboardPage() {
           ) : services.length === 0 ? (
             <div className="bg-[#F5F5F5] border-4 border-black/10 rounded-xl p-8 text-center">
               <Briefcase className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-              <p className="text-[#393939] font-medium">No tienes servicios publicados aún.</p>
+              <p className="text-[#393939] font-medium">{t.dashboard.noServicesYet}</p>
               {(profile?.role === "freelancer" || profile?.role === "both") && (
                 <Link
                   href="/services/new"
                   className="inline-flex items-center gap-2 mt-4 bg-black text-white border-3 border-black rounded-lg px-5 py-2.5 font-bold text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                 >
-                  <Plus className="w-4 h-4" /> Crear primer servicio
+                  <Plus className="w-4 h-4" /> {t.dashboard.createFirstService}
                 </Link>
               )}
             </div>
@@ -411,7 +425,7 @@ export default function DashboardPage() {
                       {s.titulo}
                     </Link>
                     <p className="text-sm text-[#393939] font-medium">
-                      ${s.precio_usdc} USDC · {s.delivery_days} días · {s.categoria}
+                      ${s.precio_usdc} USDC · {s.delivery_days} {t.common.days} · {s.categoria}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
@@ -422,13 +436,13 @@ export default function DashboardPage() {
                           : "bg-gray-200 text-gray-500"
                       }`}
                     >
-                      {s.activo ? "Activo" : "Pausado"}
+                      {s.activo ? t.common.active : t.common.paused}
                     </span>
                     <button
                       onClick={() => handleToggle(s.id, s.activo)}
                       className="bg-white border-3 border-black rounded-lg px-3 py-1.5 text-xs font-bold hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-shadow"
                     >
-                      {s.activo ? "Pausar" : "Activar"}
+                      {s.activo ? t.dashboard.pause : t.dashboard.activate}
                     </button>
                     <Link
                       href={`/services/${s.id}/edit`}
@@ -455,16 +469,16 @@ export default function DashboardPage() {
         {/* Client view - services I've hired */}
         {viewMode === "client" && (
           <section>
-            <h2 className="text-[24px] font-bold mb-4">Mis Contrataciones</h2>
+            <h2 className="text-[24px] font-bold mb-4">{t.dashboard.myHires}</h2>
             {clientOrders.length === 0 ? (
               <div className="bg-[#F5F5F5] border-4 border-black/10 rounded-xl p-8 text-center">
                 <Package className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-                <p className="text-[#393939] font-medium">No has contratado servicios aún.</p>
+                <p className="text-[#393939] font-medium">{t.dashboard.noHiresYet}</p>
                 <Link
                   href="/marketplace"
                   className="inline-flex items-center gap-2 mt-4 bg-[#2775CA] text-white border-3 border-black rounded-lg px-5 py-2.5 font-bold text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                 >
-                  <Eye className="w-4 h-4" /> Buscar Freelancers
+                  <Eye className="w-4 h-4" /> {t.dashboard.findFreelancers}
                 </Link>
               </div>
             ) : (
@@ -484,7 +498,7 @@ export default function DashboardPage() {
                            <Clock className="w-5 h-5 text-gray-600" />}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold truncate">{o.service?.titulo || "Servicio"}</p>
+                          <p className="font-bold truncate">{o.service?.titulo || t.common.service}</p>
                           <p className="text-sm text-[#393939] font-medium">${o.amount_usdc} USDC</p>
                         </div>
                       </div>
@@ -495,13 +509,7 @@ export default function DashboardPage() {
                         o.status === "refunded" ? "bg-red-100 text-red-800" :
                         "bg-gray-100 text-gray-600"
                       }`}>
-                        {o.status === "completed" ? "Completada" :
-                         o.status === "accepted" ? "Aceptada" :
-                         o.status === "in_progress" ? "En Progreso" :
-                         o.status === "delivered" ? "Entregada" :
-                         o.status === "refunded" ? "Reembolsada" :
-                         o.status === "pending" ? "Pendiente" :
-                         o.status}
+                        {statusLabel(o.status)}
                       </span>
                     </div>
                   </Link>
@@ -515,9 +523,9 @@ export default function DashboardPage() {
         {viewMode === "freelancer" && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[24px] font-bold">Órdenes Recientes</h2>
+            <h2 className="text-[24px] font-bold">{t.dashboard.recentOrders}</h2>
             <Link href="/orders" className="text-sm font-bold text-[#393939] hover:text-black">
-              Ver todas →
+              {t.dashboard.viewAll}
             </Link>
           </div>
           {loadingOrders ? (
@@ -527,12 +535,12 @@ export default function DashboardPage() {
           ) : [...myOrders, ...clientOrders].length === 0 ? (
             <div className="bg-[#F5F5F5] border-4 border-black/10 rounded-xl p-8 text-center">
               <Package className="w-10 h-10 mx-auto mb-3 text-gray-400" />
-              <p className="text-[#393939] font-medium">No tienes órdenes aún.</p>
+              <p className="text-[#393939] font-medium">{t.dashboard.noOrdersYet}</p>
               <Link
                 href="/marketplace"
                 className="inline-flex items-center gap-2 mt-4 bg-black text-white border-3 border-black rounded-lg px-5 py-2.5 font-bold text-sm shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
               >
-                Explorar Marketplace
+                {t.dashboard.exploreMarketplace}
               </Link>
             </div>
           ) : (
@@ -553,10 +561,10 @@ export default function DashboardPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-bold truncate">
-                          {o.service?.titulo || "Servicio"}
+                          {o.service?.titulo || t.common.service}
                         </p>
                         <p className="text-sm text-[#393939] font-medium">
-                          ${o.amount_usdc} USDC · {o.freelancer_id === profile?.id ? "Como freelancer" : "Como cliente"}
+                          ${o.amount_usdc} USDC · {o.freelancer_id === profile?.id ? t.dashboard.asFreelancer : t.dashboard.asClient}
                         </p>
                       </div>
                     </div>
@@ -569,13 +577,7 @@ export default function DashboardPage() {
                         "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {o.status === "completed" ? "Completada" :
-                       o.status === "accepted" ? "Aceptada" :
-                       o.status === "in_progress" ? "En Progreso" :
-                       o.status === "delivered" ? "Entregada" :
-                       o.status === "refunded" ? "Reembolsada" :
-                       o.status === "pending" ? "Pendiente" :
-                       o.status}
+                      {statusLabel(o.status)}
                     </span>
                   </div>
                 </Link>
