@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, Menu, X, Search, LayoutDashboard, LogOut, MessageSquare, Package } from "lucide-react";
+import { User, Menu, X, Search, LayoutDashboard, LogOut, MessageSquare, Package, Moon, Sun } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLanguage } from "@/contexts/language-context";
 import { useSession } from "@/contexts/session-context";
+import { useTheme } from "@/contexts/theme-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useState, useEffect, useRef } from "react";
 import { shortWallet } from "@/lib/utils";
@@ -15,6 +16,7 @@ export function Navigation() {
   const { publicKey, connected, disconnect } = useWallet();
   const { user, logout } = useSession();
   const { t } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,7 +113,7 @@ export function Navigation() {
 
   return (
     <div className="container mx-auto px-4 pt-8 pb-4">
-      <nav className="flex items-center justify-between bg-white border-4 border-black rounded-xl px-5 py-3 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <nav className="flex items-center justify-between bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white/15 rounded-xl px-5 py-3 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-none transition-colors">
         {/* Logo */}
         <Link
           href={isLoggedIn ? "/marketplace" : "/"}
@@ -174,6 +176,13 @@ export function Navigation() {
                 <span className="text-[12px] font-bold">Órdenes</span>
               </Link>
               <LanguageSwitcher />
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border-2 border-black dark:border-white/20 hover:bg-[#F5F5F5] dark:hover:bg-white/10 transition-colors"
+                title={isDark ? "Modo día" : "Modo nocturno"}
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
 
               {/* Profile dropdown */}
               <div className="relative" ref={profileRef}>
@@ -235,6 +244,13 @@ export function Navigation() {
 
             <div className="hidden md:flex items-center gap-3 flex-shrink-0">
               <LanguageSwitcher />
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border-2 border-black dark:border-white/20 hover:bg-[#F5F5F5] dark:hover:bg-white/10 transition-colors"
+                title={isDark ? "Modo día" : "Modo nocturno"}
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
               <Link
                 href="/register"
                 className="bg-white text-black border-2 border-black rounded-lg px-4 py-2 text-[14px] font-bold hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
@@ -263,7 +279,7 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-4 bg-white border-4 border-black rounded-xl p-5 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className="md:hidden mt-4 bg-white dark:bg-[#1a1a1a] border-4 border-black dark:border-white/15 rounded-xl p-5 max-w-5xl mx-auto shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-none transition-colors">
           <div className="flex flex-col gap-4">
             {isLoggedIn ? (
               <>
@@ -316,6 +332,13 @@ export function Navigation() {
             )}
 
             <div className="border-t-2 border-black/10 pt-4 mt-2 flex flex-col gap-3">
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-2 text-[18px] font-bold hover:opacity-70 transition-opacity text-left"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                {isDark ? "Modo día" : "Modo nocturno"}
+              </button>
               {!isLoggedIn && (
                 <>
                   <Link

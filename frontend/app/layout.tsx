@@ -6,6 +6,8 @@ import { LanguageProvider } from "@/contexts/language-context";
 import { SessionProvider } from "@/contexts/session-context";
 import { Toaster } from "react-hot-toast";
 import { Footer } from "@/components/footer";
+import { ThemeProvider } from "@/contexts/theme-context";
+import { StarfallCanvas } from "@/components/starfall-canvas";
 
 const onest = Onest({
   subsets: ["latin"],
@@ -27,20 +29,25 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${onest.variable} font-sans antialiased overflow-x-hidden`}>
-        <LanguageProvider>
-          <WalletProvider>
-            <SessionProvider>
-              {children}
-              <Footer />
+        <ThemeProvider>
+          <LanguageProvider>
+            <WalletProvider>
+              <SessionProvider>
+                <StarfallCanvas />
+                <div className="relative z-10">
+                  {children}
+                  <Footer />
+                </div>
               <Toaster
                 position="bottom-right"
                 toastOptions={{
                   className: "!bg-black !text-white !border-2 !border-white",
                 }}
               />
-            </SessionProvider>
-          </WalletProvider>
-        </LanguageProvider>
+              </SessionProvider>
+            </WalletProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
