@@ -8,8 +8,9 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLanguage } from "@/contexts/language-context";
 import { useSession } from "@/contexts/session-context";
 import { useTheme } from "@/contexts/theme-context";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { shortWallet } from "@/lib/utils";
+import { getUnreadDMCount, getProfileByEmail, getProfileByWallet } from "@/lib/supabase";
 
 export function Navigation() {
   const { publicKey, connected, disconnect } = useWallet();
@@ -22,10 +23,36 @@ export function Navigation() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const isLoggedIn = !!user || connected;
+  const [unreadCount, setUnreadCount] = useState(0);
   const prevConnected = useRef(connected);
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Fetch unread message count
+  const fetchUnread = useCallback(async () => {
+    let profileId: string | null = null;
+    if (user?.email) {
+      const p = await getProfileByEmail(user.email);
+      if (p) profileId = p.id;
+    }
+    if (!profileId && publicKey) {
+      const p = await getProfileByWallet(publicKey.toBase58());
+      if (p) profileId = p.id;
+    }
+    if (profileId) {
+      const count = await getUnreadDMCount(profileId);
+      setUnreadCount(count);
+    }
+  }, [user?.email, publicKey]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUnread();
+      const interval = setInterval(fetchUnread, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [isLoggedIn, fetchUnread]);
 
   // Auto-logout when wallet disconnects
   useEffect(() => {
@@ -162,10 +189,15 @@ export function Navigation() {
               </Link>
               <Link
                 href="/inbox"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-black hover:bg-[#F5F5F5] transition-colors"
+                className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-black hover:bg-[#F5F5F5] transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span className="text-[12px] font-bold">{t.navLoggedIn.messages}</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-ve-red text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/orders"
@@ -331,8 +363,13 @@ export function Navigation() {
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-[18px] font-bold hover:opacity-70 transition-opacity">
                   {t.navLoggedIn.panel}
                 </Link>
-                <Link href="/inbox" onClick={() => setMobileMenuOpen(false)} className="text-[18px] font-bold hover:opacity-70 transition-opacity">
+                <Link href="/inbox" onClick={() => setMobileMenuOpen(false)} className="relative inline-flex items-center gap-2 text-[18px] font-bold hover:opacity-70 transition-opacity">
                   {t.navLoggedIn.messages}
+                  {unreadCount > 0 && (
+                    <span className="bg-ve-red text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <Link href="/orders" onClick={() => setMobileMenuOpen(false)} className="text-[18px] font-bold hover:opacity-70 transition-opacity">
                   {t.navLoggedIn.orders}

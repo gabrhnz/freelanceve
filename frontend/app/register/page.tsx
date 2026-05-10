@@ -9,7 +9,7 @@ import { Navigation } from "@/components/navigation";
 import { useSession } from "@/contexts/session-context";
 import { Briefcase, User, Users, ArrowRight, ArrowLeft, X, Plus, Mail, Wallet, Check } from "lucide-react";
 import toast from "react-hot-toast";
-import { upsertProfile, getProfileByEmail, getProfileByWallet } from "@/lib/supabase";
+import { upsertProfile, getProfileByEmail, getProfileByWallet, sendWelcomeMessage } from "@/lib/supabase";
 
 type Role = "freelancer" | "employer" | "both";
 
@@ -223,6 +223,9 @@ export default function RegisterPage() {
         });
         return;
       }
+
+      // Send welcome message from the Wira team
+      sendWelcomeMessage(profile.id).catch(console.error);
 
       // Update JWT session if we have one
       if (user) {

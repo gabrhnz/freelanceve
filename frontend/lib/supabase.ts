@@ -650,6 +650,64 @@ export async function getConversationPartners(userId: string) {
   return partnerMap; // partnerId -> lastMessageDate
 }
 
+// ----- Unread count helper -----
+
+export async function getUnreadDMCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("direct_messages")
+    .select("*", { count: "exact", head: true })
+    .eq("receiver_id", userId)
+    .is("read_at", null);
+  if (error) console.error(error);
+  return count || 0;
+}
+
+// ----- Welcome message helpers -----
+
+const WIRA_TEAM_EMAIL = "dev@wira.app";
+
+export async function getOrCreateWiraTeamProfile(): Promise<Profile | null> {
+  // Try to find existing team profile
+  let team = await getProfileByEmail(WIRA_TEAM_EMAIL);
+  if (team) return team;
+
+  // Create team profile
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert({
+      email: WIRA_TEAM_EMAIL,
+      nombre: "Equipo Wira",
+      bio: "El equipo de desarrollo de Wira. ¡Estamos aquí para ayudarte!",
+      role: "both",
+    })
+    .select()
+    .single();
+  if (error) console.error("Error creating Wira team profile:", error);
+  return data as Profile | null;
+}
+
+export async function sendWelcomeMessage(newUserId: string) {
+  const team = await getOrCreateWiraTeamProfile();
+  if (!team) return;
+
+  const welcomeMsg = `👋 ¡Bienvenido/a a Wira!
+
+Somos el equipo de desarrollo y estamos felices de tenerte aquí. 🎉
+
+Con Wira puedes:
+• 💼 Ofrecer tus servicios como freelancer y recibir pagos en USDC
+• 🔍 Contratar talento para tus proyectos con pago seguro via escrow
+• 💬 Chatear directamente con freelancers o clientes
+• ⚡ Transacciones rápidas y baratas en Solana
+
+Estamos en fase beta y nos encantaría recibir tu feedback. Si tienes alguna sugerencia, problema o idea, no dudes en escribirnos por aquí.
+
+¡Mucho éxito! 🚀
+— Equipo Wira`;
+
+  await sendDirectMessage(team.id, newUserId, welcomeMsg);
+}
+
 // ----- Reports helpers -----
 
 export interface Report {
