@@ -41,17 +41,14 @@ export function HeroSection() {
         </div>
 
         <div className="flex justify-center md:justify-end">
-          <div className="relative w-full max-w-md aspect-square bg-[#9945FF] border-4 border-black rounded-3xl overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center">
-            <div className="text-center p-8">
-              <div className="w-24 h-24 mx-auto mb-4 bg-white rounded-full flex items-center justify-center border-4 border-black">
-                <svg viewBox="0 0 128 128" className="w-16 h-16">
-                  <circle cx="64" cy="64" r="60" fill="#2775CA"/>
-                  <text x="64" y="80" textAnchor="middle" fill="white" fontSize="48" fontWeight="bold">$</text>
-                </svg>
-              </div>
-              <div className="text-white text-2xl font-bold mb-2">{t.hero.badge}</div>
-              <div className="text-white/80 text-sm">{t.hero.badgeSub}</div>
-            </div>
+          <div className="relative w-full max-w-md aspect-video border-4 border-black rounded-3xl overflow-hidden shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src="https://www.youtube.com/embed/bBrAkjsbqD8?autoplay=1&mute=1&loop=1&playlist=bBrAkjsbqD8&controls=0&showinfo=0&rel=0"
+              title="Wira Video"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
           </div>
         </div>
       </div>
