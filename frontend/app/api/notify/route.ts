@@ -10,10 +10,12 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM = process.env.EMAIL_FROM || "Wira <noreply@billete.lat>";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,7 +36,7 @@ export async function POST(req: NextRequest) {
     if (type === "new_message") {
       // Check unread message count — only send email every 3 unread messages
       if (data.senderId && data.receiverId) {
-        const { count } = await supabaseAdmin
+        const { count } = await getSupabase()
           .from("direct_messages")
           .select("*", { count: "exact", head: true })
           .eq("sender_id", data.senderId)
