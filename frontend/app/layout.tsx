@@ -15,6 +15,8 @@ const onest = Onest({
   variable: "--font-onest",
 });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Wira — Freelance Marketplace on Solana | Pay with USDC",
   description:

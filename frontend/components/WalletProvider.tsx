@@ -23,10 +23,11 @@ interface Props {
 const WalletProvider: FC<Props> = ({ children }) => {
   const wallets = useMemo(
     () => [
+      // @ts-ignore — constructor shape changed in newer adapter versions
       new SolanaMobileWalletAdapter({
         appIdentity: {
           name: "Wira",
-          uri: typeof window !== "undefined" ? window.location.origin : "https://frontend-mauve-kappa-18.vercel.app",
+          uri: typeof window !== "undefined" ? window.location.origin : "https://frontend-seven-zeta-70.vercel.app",
           icon: "/icon-192.png",
         },
         cluster: "devnet",
