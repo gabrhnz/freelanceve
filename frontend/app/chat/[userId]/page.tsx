@@ -137,7 +137,7 @@ export default function ChatPage() {
           senderName,
           senderId: myProfile?.id,
           receiverId: recipientProfile.id,
-          chatUrl: `https://frontend-mauve-kappa-18.vercel.app/chat/${myProfile?.id}`,
+          chatUrl: `https://wiraproject.vercel.app/chat/${myProfile?.id}`,
         },
       }),
     }).catch(() => {});

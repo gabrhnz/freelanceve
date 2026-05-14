@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const chatLink = data.chatUrl || data.orderUrl || "https://frontend-mauve-kappa-18.vercel.app/inbox";
+      const chatLink = data.chatUrl || data.orderUrl || "https://wiraproject.vercel.app/inbox";
       subject = `💬 Tienes mensajes sin leer — Wira`;
       html = `
         <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; border: 4px solid black; border-radius: 16px;">
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
           </div>
           <p style="color: #393939; font-size: 14px; margin-bottom: 16px;">Cliente: <strong>${data.clientName || "Un cliente"}</strong></p>
           <p style="color: #393939; font-size: 14px; margin-bottom: 20px;">⏰ Tienes 24 horas para aceptar esta orden.</p>
-          <a href="${data.orderUrl || "https://frontend-mauve-kappa-18.vercel.app/orders"}" 
+          <a href="${data.orderUrl || "https://wiraproject.vercel.app/orders"}" 
              style="display: inline-block; background: black; color: white; font-weight: 800; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-size: 14px;">
             Ver orden →
           </a>

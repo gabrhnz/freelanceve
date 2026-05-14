@@ -388,7 +388,7 @@ export default function OrderDetailPage() {
         notify("new_message", recipientEmail, {
           senderName: myProfile.nombre,
           content: msgInput.trim(),
-          orderUrl: `https://frontend-mauve-kappa-18.vercel.app/orders/${order.id}`,
+          orderUrl: `https://wiraproject.vercel.app/orders/${order.id}`,
         });
       }
     } else {
@@ -453,7 +453,7 @@ export default function OrderDetailPage() {
           notify("new_message", recipientEmail, {
             senderName: myProfile.nombre,
             content: `📎 ${file.name}`,
-            orderUrl: `https://frontend-mauve-kappa-18.vercel.app/orders/${order.id}`,
+            orderUrl: `https://wiraproject.vercel.app/orders/${order.id}`,
           });
         }
       }

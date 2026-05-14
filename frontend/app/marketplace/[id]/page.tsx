@@ -291,7 +291,7 @@ export default function ServiceDetailPage() {
                 serviceTitle: service.titulo,
                 amount: service.precio_usdc,
                 clientName: myProfile.nombre,
-                orderUrl: `https://frontend-mauve-kappa-18.vercel.app/orders/${order.id}`,
+                orderUrl: `https://wiraproject.vercel.app/orders/${order.id}`,
               },
             }),
           }).catch(() => {});
