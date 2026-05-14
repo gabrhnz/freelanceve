@@ -12,7 +12,7 @@ Built for the **Latin American remote worker** who needs fast, borderless, censo
 
 | | |
 |--|--|
-| **App** | [frontend-mauve-kappa-18.vercel.app](https://frontend-mauve-kappa-18.vercel.app) |
+| **App** | [wiraproject.vercel.app](https://wiraproject.vercel.app) |
 | **Program ID** | [`6zjwrFhvtcub6FYvb3kZCGTXLT3pzH2fQmyjFhM5WQSb`](https://explorer.solana.com/address/6zjwrFhvtcub6FYvb3kZCGTXLT3pzH2fQmyjFhM5WQSb?cluster=devnet) |
 | **USDC Mint (Devnet)** | [`4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`](https://explorer.solana.com/address/4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU?cluster=devnet) |
 | **Network** | Solana Devnet |
