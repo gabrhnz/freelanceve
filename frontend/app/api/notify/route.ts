@@ -8,7 +8,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-const FROM = process.env.EMAIL_FROM || "Wira <noreply@billete.lat>";
+const FROM = process.env.EMAIL_FROM || "Wira <no-reply@billete.lat>";
 
 function getSupabase() {
   return createClient(

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const { data, error: resendError } = await resend.emails.send({
-        from: process.env.EMAIL_FROM || "Wira <noreply@billete.lat>",
+        from: process.env.EMAIL_FROM || "Wira <no-reply@billete.lat>",
         to: email,
         subject: "Tu código de acceso - Wira",
         html: `
